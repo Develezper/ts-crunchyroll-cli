@@ -4,4 +4,5 @@
  * Rule: no dependency on infrastructure or console output.
  */
 
-export {};
+export * from './Series';
+export * from './Category';

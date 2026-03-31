@@ -6,4 +6,17 @@
  * - Keep strict typing and avoid `any`
  */
 
-export {};
+import { Series, Category } from './domain/entities';
+
+// Initial data for Categories
+export const categories: Category[] = [
+  new Category('1', 'Acción'),
+  new Category('2', 'Romance'),
+  new Category('3', 'Isekai')
+];
+
+// Initial data for Series
+export const series: Series[] = [
+  new Series('1', 'Chainsaw Man', '1'),
+  new Series('2', 'Frieren', '3')
+];
