@@ -1,9 +1,9 @@
-/**
- * Service/use-case access point.
- *
- * Team TODO:
- * - Instantiate application services
- * - Apply shared decorators and validations
- */
+import { UserService } from "./application/services/UserService";
+import { JsonUserRepository } from "./infrastructure/repositories/JsonUserRepository";
 
-export {};
+// Wiring de dependencias e inyección
+// Usar el repositorio basado en sistema de archivos (.json)
+const userRepository = new JsonUserRepository();
+const userService = new UserService(userRepository);
+
+export { userService, userRepository };

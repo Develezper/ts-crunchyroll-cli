@@ -1,0 +1,71 @@
+import type { UserProps } from "../../domain/entities/User";
+import { User } from "../../domain/entities/User";
+import type { IUserRepository } from "../../domain/interfaces/UserRepository";
+import { validarAdmin } from "../../shared/utils/auth";
+import { LogExecution } from "../../shared/decorators/LogExecution";
+
+export class UserService {
+    constructor(private readonly userRepository: IUserRepository) { }
+
+    @LogExecution()
+    async login(email: string, password?: string): Promise<User> {
+        const user = await this.userRepository.findByEmail(email);
+        // Validacion
+        if (!user || !user.activo) {
+            throw new Error("Credenciales inválidas o usuario inactivo");
+        }
+        // Si hay una contraseña, validarla. De lo contrario, dejar pasar (para testing rápido)
+        if (password && user.password !== password) {
+            throw new Error("Contraseña incorrecta");
+        }
+        return user;
+    }
+
+    @LogExecution()
+    async createUser(adminUser: User, data: Omit<UserProps, "id" | "fechaCreacion" | "favoritos" | "historial" | "activo">): Promise<User> {
+        validarAdmin(adminUser); // Solo admins pueden crear explícitamente usuarios si la regla aplica
+
+        const exist = await this.userRepository.findByEmail(data.email);
+        if (exist) {
+            throw new Error("El email ya está en uso");
+        }
+
+        return this.userRepository.create(data);
+    }
+
+    @LogExecution()
+    async getAllActiveUsers(adminUser: User): Promise<User[]> {
+        validarAdmin(adminUser);
+        return this.userRepository.findAll(true);
+    }
+
+    @LogExecution()
+    async getUserById(id: number): Promise<User | null> {
+        return this.userRepository.findById(id);
+    }
+
+    @LogExecution()
+    async updateUser(adminUser: User, id: number, data: Partial<UserProps>): Promise<User | null> {
+        validarAdmin(adminUser);
+        return this.userRepository.update(id, data);
+    }
+
+    @LogExecution()
+    async softDeleteUser(adminUser: User, id: number): Promise<boolean> {
+        validarAdmin(adminUser);
+        if (adminUser.id === id) {
+            throw new Error("No puedes eliminarte a ti mismo");
+        }
+        return this.userRepository.softDelete(id);
+    }
+
+    @LogExecution()
+    async addFavorite(userId: number, seriesId: number): Promise<void> {
+        await this.userRepository.addFavorite(userId, seriesId);
+    }
+
+    @LogExecution()
+    async watchSeries(userId: number, seriesId: number): Promise<void> {
+        await this.userRepository.addToHistory(userId, seriesId);
+    }
+}
