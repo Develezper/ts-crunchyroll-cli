@@ -33,13 +33,13 @@ src/
 
 Implementado:
 
+- Modulo usuarios: entidad, contrato, servicio, repositorios (in-memory/json), controlador y vista.
 - Modulo categorias: entidad, contrato, servicio, repositorio, controlador y vista.
 - Modulo temporadas/episodios: entidad, contrato, servicio, repositorio, controlador y vista.
 - Base compartida: errores, utilidades y decorador de log.
 
 Pendiente:
 
-- Modulo usuarios.
 - Modulo series.
 - Integracion completa de menu CRUD interactivo.
 
@@ -64,13 +64,14 @@ Pendiente:
 
 | Archivo | Tarea |
 |---|---|
-| `src/domain/entities/User.ts` | Clase `User` (`id`, `name`, `email`, `favorites`). |
+| `src/domain/entities/User.ts` | Mantener clase `User` (id, nombre, email, rol, favoritos, historial, activo). |
 | `src/domain/interfaces/UserRepository.ts` | Contrato CRUD + favoritos. |
-| `src/application/services/UserService.ts` | CRUD + validaciones de usuario. |
-| `src/infrastructure/repositories/InMemoryUserRepository.ts` | Implementacion in-memory de usuarios. |
-| `src/presentation/controllers/UserController.ts` | Flujo de acciones CLI de usuarios. |
-| `src/presentation/views/UserView.ts` | Render de usuarios en consola (espanol). |
-| `src/infrastructure/database/inMemoryDb.ts` | Agregar seed de usuarios. |
+| `src/application/services/UserService.ts` | Mantener CRUD + validaciones de usuario. |
+| `src/infrastructure/repositories/InMemoryUserRepository.ts` | Mantener implementacion in-memory de usuarios. |
+| `src/infrastructure/repositories/JsonUserRepository.ts` | Mantener persistencia de usuarios en JSON. |
+| `src/presentation/controllers/UserController.ts` | Mantener flujo de acciones CLI de usuarios. |
+| `src/presentation/views/UserView.ts` | Mantener render de usuarios en consola (espanol). |
+| `src/data.ts` y `data/users.json` | Mantener/ajustar seed de usuarios. |
 
 ### Dev 2 - Series y Categorias
 
@@ -80,13 +81,13 @@ Pendiente:
 | `src/domain/entities/Category.ts` | Mantener y extender reglas de categoria si aplica. |
 | `src/domain/interfaces/SeriesRepository.ts` | Contrato CRUD + filtro por categoria. |
 | `src/domain/interfaces/CategoryRepository.ts` | Mantener contrato CRUD de categorias. |
-| `src/application/services/SeriesService.ts` | CRUD de series + validaciones. |
+| `src/application/services/SeriesService.ts` | Crear CRUD de series + validaciones. |
 | `src/application/services/CategoryService.ts` | Mantener y mejorar validaciones de categoria. |
-| `src/infrastructure/repositories/InMemorySeriesRepository.ts` | Implementacion in-memory de series. |
+| `src/infrastructure/repositories/InMemorySeriesRepository.ts` | Crear implementacion in-memory de series. |
 | `src/infrastructure/repositories/InMemoryCategoryRepository.ts` | Mantener repo de categorias. |
-| `src/presentation/controllers/SeriesController.ts` | Acciones CLI de series/categorias. |
-| `src/presentation/views/SeriesView.ts` | Render de series/categorias en espanol. |
-| `src/infrastructure/database/inMemoryDb.ts` | Agregar seed de series. |
+| `src/presentation/controllers/SeriesController.ts` | Crear acciones CLI de series/categorias. |
+| `src/presentation/views/SeriesView.ts` | Crear render de series/categorias en espanol. |
+| `src/data.ts` o `src/infrastructure/database/inMemoryDb.ts` | Agregar seed de series en la fuente que el equipo defina. |
 
 ### Dev 3 - Temporadas y Episodios
 

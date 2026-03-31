@@ -7,22 +7,28 @@ Console CRUD project in TypeScript, structured with Clean Architecture principle
 ```txt
 src/
 ├── index.ts
+├── data.ts
 ├── domain/
 │   ├── entities/
 │   │   ├── Category.ts
-│   │   ├── Season.ts
 │   │   ├── Episode.ts
+│   │   ├── Season.ts
+│   │   ├── Series.ts
+│   │   ├── User.ts
 │   │   └── index.ts
 │   └── interfaces/
 │       ├── CategoryRepository.ts
-│       ├── SeasonRepository.ts
 │       ├── EpisodeRepository.ts
+│       ├── SeasonRepository.ts
+│       ├── SeriesRepository.ts
+│       ├── UserRepository.ts
 │       └── index.ts
 ├── application/
 │   └── services/
 │       ├── CategoryService.ts
-│       ├── SeasonService.ts
 │       ├── EpisodeService.ts
+│       ├── SeasonService.ts
+│       ├── UserService.ts
 │       └── index.ts
 ├── infrastructure/
 │   ├── database/
@@ -30,18 +36,22 @@ src/
 │   │   └── index.ts
 │   └── repositories/
 │       ├── InMemoryCategoryRepository.ts
-│       ├── InMemorySeasonRepository.ts
 │       ├── InMemoryEpisodeRepository.ts
+│       ├── InMemorySeasonRepository.ts
+│       ├── InMemoryUserRepository.ts
+│       ├── JsonUserRepository.ts
 │       └── index.ts
 ├── presentation/
 │   ├── controllers/
 │   │   ├── CategoryController.ts
 │   │   ├── SeasonEpisodeController.ts
+│   │   ├── UserController.ts
 │   │   └── index.ts
 │   └── views/
-│       ├── CommonView.ts
 │       ├── CategoryView.ts
+│       ├── CommonView.ts
 │       ├── SeasonEpisodeView.ts
+│       ├── UserView.ts
 │       └── index.ts
 └── shared/
     ├── decorators/
@@ -52,9 +62,15 @@ src/
     │   ├── NotFoundError.ts
     │   └── index.ts
     └── utils/
+        ├── auth.ts
         ├── generateId.ts
         └── index.ts
 ```
+
+## Current Status
+
+- Implemented: `users`, `categories`, `seasons`, `episodes` (with services, repos, controllers, and views).
+- Pending: complete `series` service/repository/controller/view and integrate a full interactive CRUD menu in `index.ts`.
 
 ## Language Rule
 
