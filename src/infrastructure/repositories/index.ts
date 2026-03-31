@@ -59,23 +59,39 @@ export class InMemorySeriesRepository implements SeriesRepository {
 export class InMemoryCategoryRepository implements CategoryRepository {
   private data: Category[] = categoriesData;
 
-  save(category: Category): void {
+  create(category: Category): Category {
     this.data.push(category);
+    return category;
   }
-  findById(id: string): Category | null {
-    const result = this.data.find((item) => item.id === id);
-    return result || null;
+
+  existsByName(name: string): boolean {
+    return this.data.some((item) => item.name.toLowerCase() === name.toLowerCase());
   }
+
+  findById(id: number): Category | undefined {
+    return this.data.find((item) => item.id === id);
+  }
+
   findAll(): Category[] {
     return this.data;
   }
-  update(id: string, updates: Partial<Category>): void {
+
+  update(id: number, updates: Partial<Omit<Category, "id">>): Category | undefined {
     const index = this.data.findIndex((item) => item.id === id);
     if (index !== -1) {
       this.data[index] = { ...this.data[index]!, ...updates } as Category;
+      return this.data[index];
     }
+
+    return undefined;
   }
-  delete(id: string): void {
+
+  delete(id: number): boolean {
+    const previous = this.data.length;
     this.data = this.data.filter((item) => item.id !== id);
+    return this.data.length < previous;
   }
 }
+
+export { InMemorySeasonRepository } from "./InMemorySeasonRepository";
+export { InMemoryEpisodeRepository } from "./InMemoryEpisodeRepository";

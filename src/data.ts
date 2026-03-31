@@ -10,9 +10,9 @@ import { Series, Category } from './domain/entities';
 
 // Initial data for Categories
 export const categories: Category[] = [
-  new Category('1', 'Acción'),
-  new Category('2', 'Romance'),
-  new Category('3', 'Isekai')
+  new Category(1, 'Acción', 'Series con alto ritmo y combates'),
+  new Category(2, 'Romance', 'Historias centradas en relaciones'),
+  new Category(3, 'Isekai', 'Protagonistas transportados a otro mundo')
 ];
 
 // Initial data for Series
