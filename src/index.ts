@@ -133,8 +133,9 @@ async function bootstrapCli(): Promise<void> {
         console.log("❌ Número inválido.");
         continue;
       }
+      const safeNumber = number === null ? undefined : number;
       seasonEpisodeController.updateSeason(id, {
-        number,
+        number: safeNumber,
         title: title.trim() ? title.trim() : undefined
       });
       continue;
@@ -188,10 +189,12 @@ async function bootstrapCli(): Promise<void> {
         console.log("❌ Número o duración inválidos.");
         continue;
       }
+      const safeNumber = number === null ? undefined : number;
+      const safeDuration = durationMin === null ? undefined : durationMin;
       seasonEpisodeController.updateEpisode(id, {
-        number,
+        number: safeNumber,
         title: title.trim() ? title.trim() : undefined,
-        durationMin
+        durationMin: safeDuration
       });
       continue;
     }
