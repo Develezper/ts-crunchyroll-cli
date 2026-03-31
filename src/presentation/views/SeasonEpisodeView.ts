@@ -2,11 +2,19 @@ import { Episode } from "../../domain/entities/Episode";
 import { Season } from "../../domain/entities/Season";
 
 export class SeasonEpisodeView {
+  static showSeason(season: Season): void {
+    console.log(`🎞️ Temporada [${season.id}] Serie ${season.seriesId} | T${season.number}: ${season.title}`);
+  }
+
   static showSeasons(seasons: Season[]): void {
     console.log("\n🎞️ Temporadas:\n");
     for (const season of seasons) {
       console.log(`- [${season.id}] Serie ${season.seriesId} | T${season.number}: ${season.title}`);
     }
+  }
+
+  static showEpisode(episode: Episode): void {
+    console.log(`📺 Episodio [${episode.id}] S${episode.seasonId}E${episode.number}: ${episode.title} (${episode.durationMin} min)`);
   }
 
   static showEpisodes(episodes: Episode[]): void {
