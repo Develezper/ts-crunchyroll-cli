@@ -14,8 +14,10 @@ export class UserService {
         if (!user || !user.activo) {
             throw new Error("Credenciales inválidas o usuario inactivo");
         }
-        // Si hay una contraseña, validarla. De lo contrario, dejar pasar (para testing rápido)
-        if (password && user.password !== password) {
+        if (!password) {
+            throw new Error("La contraseña es requerida para poder iniciar sesión");
+        }
+        if (user.password !== password) {
             throw new Error("Contraseña incorrecta");
         }
         return user;
