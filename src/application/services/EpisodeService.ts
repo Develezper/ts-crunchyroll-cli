@@ -31,8 +31,25 @@ export class EpisodeService {
       throw new ValidationError("El titulo del episodio es obligatorio.");
     }
 
+    const duplicatedEpisodeNumber = this.episodeRepository
+      .findBySeasonId(seasonId)
+      .some((episode) => episode.number === number);
+    if (duplicatedEpisodeNumber) {
+      throw new ValidationError("Ya existe un episodio con ese numero en la temporada.");
+    }
+
     const id = generateId(this.episodeRepository.findAll());
-    return this.episodeRepository.create(new Episode(id, seasonId, number, trimmedTitle, durationMin));
+    const created = this.episodeRepository.create(
+      new Episode(id, seasonId, number, trimmedTitle, durationMin)
+    );
+
+    if (!season.episodeIds.includes(created.id)) {
+      this.seasonRepository.update(season.id, {
+        episodeIds: [...season.episodeIds, created.id]
+      });
+    }
+
+    return created;
   }
 
   findAll(): Episode[] {
@@ -40,11 +57,47 @@ export class EpisodeService {
   }
 
   findBySeason(seasonId: number): Episode[] {
+    if (!this.seasonRepository.findById(seasonId)) {
+      throw new NotFoundError("La temporada indicada no existe.");
+    }
+
     return this.episodeRepository.findBySeasonId(seasonId);
   }
 
   update(id: number, data: Partial<Omit<Episode, "id" | "seasonId">>): Episode {
-    const updated = this.episodeRepository.update(id, data);
+    const episode = this.episodeRepository.findById(id);
+    if (!episode) {
+      throw new NotFoundError("Episodio no encontrado para actualizar.");
+    }
+
+    if (data.number !== undefined) {
+      if (data.number <= 0) {
+        throw new ValidationError("El numero de episodio debe ser mayor a 0.");
+      }
+
+      const duplicatedEpisodeNumber = this.episodeRepository
+        .findBySeasonId(episode.seasonId)
+        .some((existingEpisode) => existingEpisode.id !== id && existingEpisode.number === data.number);
+
+      if (duplicatedEpisodeNumber) {
+        throw new ValidationError("Ya existe un episodio con ese numero en la temporada.");
+      }
+    }
+
+    if (data.durationMin !== undefined && data.durationMin <= 0) {
+      throw new ValidationError("La duracion debe ser mayor a 0 minutos.");
+    }
+
+    if (data.title !== undefined && !data.title.trim()) {
+      throw new ValidationError("El titulo del episodio no puede estar vacio.");
+    }
+
+    const safeData: Partial<Omit<Episode, "id" | "seasonId">> = {
+      ...data,
+      title: data.title?.trim()
+    };
+
+    const updated = this.episodeRepository.update(id, safeData);
     if (!updated) {
       throw new NotFoundError("Episodio no encontrado para actualizar.");
     }
@@ -53,9 +106,21 @@ export class EpisodeService {
   }
 
   remove(id: number): void {
+    const episode = this.episodeRepository.findById(id);
+    if (!episode) {
+      throw new NotFoundError("Episodio no encontrado para eliminar.");
+    }
+
     const removed = this.episodeRepository.delete(id);
     if (!removed) {
       throw new NotFoundError("Episodio no encontrado para eliminar.");
+    }
+
+    const season = this.seasonRepository.findById(episode.seasonId);
+    if (season) {
+      this.seasonRepository.update(season.id, {
+        episodeIds: season.episodeIds.filter((episodeId) => episodeId !== id)
+      });
     }
   }
 }

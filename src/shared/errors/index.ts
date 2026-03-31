@@ -1,2 +1,1 @@
-export { ValidationError } from "./ValidationError";
-export { NotFoundError } from "./NotFoundError";
+export { AuthorizationError, NotFoundError, ValidationError } from "./AppErrors";

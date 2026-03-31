@@ -1,74 +1,116 @@
 import type { UserProps } from "../../domain/entities/User";
 import { User } from "../../domain/entities/User";
 import type { IUserRepository } from "../../domain/interfaces/UserRepository";
-import { validarAdmin } from "../../shared/utils/auth";
+import { NotFoundError, ValidationError } from "../../shared/errors";
+import { validarAdmin } from "../../shared/utils";
 import { LogExecution } from "../../shared/decorators/LogExecution";
 
+type CreateUserInput = Omit<
+  UserProps,
+  "id" | "fechaCreacion" | "favoritos" | "historial" | "activo" | "password"
+> & { password: string };
+type UpdateUserInput = Partial<Pick<UserProps, "nombre" | "email" | "rol">>;
+
 export class UserService {
-    constructor(private readonly userRepository: IUserRepository) { }
+  constructor(private readonly userRepository: IUserRepository) {}
 
-    @LogExecution()
-    async login(email: string, password?: string): Promise<User> {
-        const user = await this.userRepository.findByEmail(email);
-        // Validation
-        if (!user || !user.activo) {
-            throw new Error("Credenciales inválidas o usuario inactivo");
-        }
-        if (!password) {
-            throw new Error("La contraseña es requerida para poder iniciar sesión");
-        }
-        if (user.password !== password) {
-            throw new Error("Contraseña incorrecta");
-        }
-        return user;
+  private normalizeEmail(email: string): string {
+    return email.trim().toLowerCase();
+  }
+
+  private validateCreateInput(data: CreateUserInput): void {
+    if (!data.nombre.trim()) {
+      throw new ValidationError("El nombre del usuario es obligatorio.");
     }
 
-    @LogExecution()
-    async createUser(adminUser: User, data: Omit<UserProps, "id" | "fechaCreacion" | "favoritos" | "historial" | "activo">): Promise<User> {
-        // Only admins can create users explicitly when this rule applies
-        validarAdmin(adminUser);
-
-        const exist = await this.userRepository.findByEmail(data.email);
-        if (exist) {
-            throw new Error("El email ya está en uso");
-        }
-
-        return this.userRepository.create(data);
+    if (!data.email.trim()) {
+      throw new ValidationError("El email del usuario es obligatorio.");
     }
 
-    @LogExecution()
-    async getAllActiveUsers(adminUser: User): Promise<User[]> {
-        validarAdmin(adminUser);
-        return this.userRepository.findAll(true);
+    if (!data.password?.trim()) {
+      throw new ValidationError("La contraseña del usuario es obligatoria.");
+    }
+  }
+
+  @LogExecution()
+  async createUser(adminUser: User, data: CreateUserInput): Promise<User> {
+    validarAdmin(adminUser);
+    this.validateCreateInput(data);
+
+    const normalizedEmail = this.normalizeEmail(data.email);
+    const existingUser = await this.userRepository.findByEmail(normalizedEmail);
+    if (existingUser) {
+      throw new ValidationError("El email ya esta en uso.");
     }
 
-    @LogExecution()
-    async getUserById(id: number): Promise<User | null> {
-        return this.userRepository.findById(id);
+    return this.userRepository.create({
+      ...data,
+      nombre: data.nombre.trim(),
+      email: normalizedEmail,
+      password: data.password.trim()
+    });
+  }
+
+  @LogExecution()
+  async getAllActiveUsers(adminUser: User): Promise<User[]> {
+    validarAdmin(adminUser);
+    return this.userRepository.findAll(true);
+  }
+
+  @LogExecution()
+  async updateUser(adminUser: User, id: number, data: UpdateUserInput): Promise<User> {
+    validarAdmin(adminUser);
+
+    const user = await this.userRepository.findById(id);
+    if (!user) {
+      throw new NotFoundError("Usuario no encontrado para actualizar.");
     }
 
-    @LogExecution()
-    async updateUser(adminUser: User, id: number, data: Partial<UserProps>): Promise<User | null> {
-        validarAdmin(adminUser);
-        return this.userRepository.update(id, data);
+    const safeData: UpdateUserInput = {};
+    if (data.nombre !== undefined) {
+      const trimmedName = data.nombre.trim();
+      if (!trimmedName) {
+        throw new ValidationError("El nombre no puede estar vacio.");
+      }
+      safeData.nombre = trimmedName;
     }
 
-    @LogExecution()
-    async softDeleteUser(adminUser: User, id: number): Promise<boolean> {
-        validarAdmin(adminUser);
-        if (adminUser.id === id) {
-            throw new Error("No puedes eliminarte a ti mismo");
-        }
-        return this.userRepository.softDelete(id);
+    if (data.email !== undefined) {
+      const normalizedEmail = this.normalizeEmail(data.email);
+      if (!normalizedEmail) {
+        throw new ValidationError("El email no puede estar vacio.");
+      }
+
+      const existingUser = await this.userRepository.findByEmail(normalizedEmail);
+      if (existingUser && existingUser.id !== id) {
+        throw new ValidationError("El email ya esta en uso.");
+      }
+
+      safeData.email = normalizedEmail;
     }
 
-    @LogExecution()
-    async addFavorite(userId: number, seriesId: number): Promise<void> {
-        await this.userRepository.addFavorite(userId, seriesId);
+    if (data.rol !== undefined) {
+      safeData.rol = data.rol;
     }
 
-    @LogExecution()
-    async watchSeries(userId: number, seriesId: number): Promise<void> {
-        await this.userRepository.addToHistory(userId, seriesId);
+    const updated = await this.userRepository.update(id, safeData);
+    if (!updated) {
+      throw new NotFoundError("Usuario no encontrado para actualizar.");
     }
+
+    return updated;
+  }
+
+  @LogExecution()
+  async softDeleteUser(adminUser: User, id: number): Promise<void> {
+    validarAdmin(adminUser);
+    if (adminUser.id === id) {
+      throw new ValidationError("No puedes eliminarte a ti mismo.");
+    }
+
+    const removed = await this.userRepository.softDelete(id);
+    if (!removed) {
+      throw new NotFoundError("Usuario no encontrado para eliminar.");
+    }
+  }
 }
