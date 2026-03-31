@@ -1,31 +1,34 @@
 import type { Rol, User } from "../../domain/entities/User";
 import { UserService } from "../../application/services/UserService";
+import { BaseController } from "./BaseController";
 import { CommonView } from "../views/CommonView";
 import { UserView } from "../views/UserView";
 
-export class UserController {
-  constructor(private readonly userService: UserService) {}
+export class UserController extends BaseController {
+  constructor(private readonly userService: UserService) {
+    super();
+  }
 
   async create(
     currentUser: User,
     data: { nombre: string; email: string; password: string; rol: Rol }
   ): Promise<void> {
-    try {
-      const created = await this.userService.createUser(currentUser, data);
-      CommonView.showSuccess("Usuario creado correctamente.");
-      UserView.showItem(created);
-    } catch (error) {
-      CommonView.showError(error);
+    const created = await this.executeAsync(() => this.userService.createUser(currentUser, data));
+    if (!created) {
+      return;
     }
+
+    CommonView.showSuccess("Usuario creado correctamente.");
+    UserView.showItem(created);
   }
 
   async listActive(currentUser: User): Promise<void> {
-    try {
-      const users = await this.userService.getAllActiveUsers(currentUser);
-      UserView.showList(users);
-    } catch (error) {
-      CommonView.showError(error);
+    const users = await this.executeAsync(() => this.userService.getAllActiveUsers(currentUser));
+    if (!users) {
+      return;
     }
+
+    UserView.showList(users);
   }
 
   async update(
@@ -33,31 +36,21 @@ export class UserController {
     id: number,
     data: { nombre?: string; email?: string; rol?: Rol }
   ): Promise<void> {
-    try {
-      const updated = await this.userService.updateUser(currentUser, id, data);
-      if (!updated) {
-        CommonView.showError(new Error("Usuario no encontrado para actualizar."));
-        return;
-      }
-
-      CommonView.showSuccess("Usuario actualizado correctamente.");
-      UserView.showItem(updated);
-    } catch (error) {
-      CommonView.showError(error);
+    const updated = await this.executeAsync(() => this.userService.updateUser(currentUser, id, data));
+    if (!updated) {
+      return;
     }
+
+    CommonView.showSuccess("Usuario actualizado correctamente.");
+    UserView.showItem(updated);
   }
 
   async remove(currentUser: User, id: number): Promise<void> {
-    try {
-      const removed = await this.userService.softDeleteUser(currentUser, id);
-      if (!removed) {
-        CommonView.showError(new Error("Usuario no encontrado para eliminar."));
-        return;
-      }
-
-      CommonView.showSuccess(`Usuario ${id} eliminado correctamente (borrado lógico).`);
-    } catch (error) {
-      CommonView.showError(error);
+    const completed = await this.runAsync(() => this.userService.softDeleteUser(currentUser, id));
+    if (!completed) {
+      return;
     }
+
+    CommonView.showSuccess(`Usuario ${id} eliminado correctamente (borrado lógico).`);
   }
 }

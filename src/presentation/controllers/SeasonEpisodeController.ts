@@ -1,99 +1,104 @@
 import { EpisodeService } from "../../application/services/EpisodeService";
 import { SeasonService } from "../../application/services/SeasonService";
+import { BaseController } from "./BaseController";
 import { CommonView } from "../views/CommonView";
 import { SeasonEpisodeView } from "../views/SeasonEpisodeView";
 
-export class SeasonEpisodeController {
+export class SeasonEpisodeController extends BaseController {
   constructor(
     private readonly seasonService: SeasonService,
     private readonly episodeService: EpisodeService
-  ) {}
+  ) {
+    super();
+  }
 
   createSeason(seriesId: number, number: number, title: string): void {
-    try {
-      const season = this.seasonService.create(seriesId, number, title);
-      CommonView.showSuccess("Temporada creada correctamente.");
-      SeasonEpisodeView.showSeason(season);
-    } catch (error) {
-      CommonView.showError(error);
+    const season = this.execute(() => this.seasonService.create(seriesId, number, title));
+    if (!season) {
+      return;
     }
+
+    CommonView.showSuccess("Temporada creada correctamente.");
+    SeasonEpisodeView.showSeason(season);
   }
 
   listSeasons(): void {
-    try {
-      SeasonEpisodeView.showSeasons(this.seasonService.findAll());
-    } catch (error) {
-      CommonView.showError(error);
+    const seasons = this.execute(() => this.seasonService.findAll());
+    if (!seasons) {
+      return;
     }
+
+    SeasonEpisodeView.showSeasons(seasons);
   }
 
-  updateSeason(
-    id: number,
-    data: { number?: number; title?: string; episodeIds?: number[] }
-  ): void {
-    try {
-      const updated = this.seasonService.update(id, data);
-      CommonView.showSuccess("Temporada actualizada correctamente.");
-      SeasonEpisodeView.showSeason(updated);
-    } catch (error) {
-      CommonView.showError(error);
+  updateSeason(id: number, data: { number?: number; title?: string }): void {
+    const updated = this.execute(() => this.seasonService.update(id, data));
+    if (!updated) {
+      return;
     }
+
+    CommonView.showSuccess("Temporada actualizada correctamente.");
+    SeasonEpisodeView.showSeason(updated);
   }
 
   removeSeason(id: number): void {
-    try {
-      this.seasonService.remove(id);
-      CommonView.showSuccess(`Temporada ${id} eliminada correctamente.`);
-    } catch (error) {
-      CommonView.showError(error);
+    const completed = this.run(() => this.seasonService.remove(id));
+    if (!completed) {
+      return;
     }
+
+    CommonView.showSuccess(`Temporada ${id} eliminada correctamente.`);
   }
 
   createEpisode(seasonId: number, number: number, title: string, durationMin: number): void {
-    try {
-      const episode = this.episodeService.create(seasonId, number, title, durationMin);
-      CommonView.showSuccess("Episodio creado correctamente.");
-      SeasonEpisodeView.showEpisode(episode);
-    } catch (error) {
-      CommonView.showError(error);
+    const episode = this.execute(() =>
+      this.episodeService.create(seasonId, number, title, durationMin)
+    );
+    if (!episode) {
+      return;
     }
+
+    CommonView.showSuccess("Episodio creado correctamente.");
+    SeasonEpisodeView.showEpisode(episode);
   }
 
   listEpisodesBySeason(seasonId: number): void {
-    try {
-      SeasonEpisodeView.showEpisodes(this.episodeService.findBySeason(seasonId));
-    } catch (error) {
-      CommonView.showError(error);
+    const episodes = this.execute(() => this.episodeService.findBySeason(seasonId));
+    if (!episodes) {
+      return;
     }
+
+    SeasonEpisodeView.showEpisodes(episodes);
   }
 
   listAllEpisodes(): void {
-    try {
-      SeasonEpisodeView.showEpisodes(this.episodeService.findAll());
-    } catch (error) {
-      CommonView.showError(error);
+    const episodes = this.execute(() => this.episodeService.findAll());
+    if (!episodes) {
+      return;
     }
+
+    SeasonEpisodeView.showEpisodes(episodes);
   }
 
   updateEpisode(
     id: number,
     data: { number?: number; title?: string; durationMin?: number }
   ): void {
-    try {
-      const updated = this.episodeService.update(id, data);
-      CommonView.showSuccess("Episodio actualizado correctamente.");
-      SeasonEpisodeView.showEpisode(updated);
-    } catch (error) {
-      CommonView.showError(error);
+    const updated = this.execute(() => this.episodeService.update(id, data));
+    if (!updated) {
+      return;
     }
+
+    CommonView.showSuccess("Episodio actualizado correctamente.");
+    SeasonEpisodeView.showEpisode(updated);
   }
 
   removeEpisode(id: number): void {
-    try {
-      this.episodeService.remove(id);
-      CommonView.showSuccess(`Episodio ${id} eliminado correctamente.`);
-    } catch (error) {
-      CommonView.showError(error);
+    const completed = this.run(() => this.episodeService.remove(id));
+    if (!completed) {
+      return;
     }
+
+    CommonView.showSuccess(`Episodio ${id} eliminado correctamente.`);
   }
 }

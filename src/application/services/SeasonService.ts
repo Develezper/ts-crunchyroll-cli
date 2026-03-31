@@ -24,6 +24,13 @@ export class SeasonService {
       throw new ValidationError("El numero de temporada debe ser mayor a 0.");
     }
 
+    const duplicatedNumber = this.seasonRepository
+      .findBySeriesId(seriesId)
+      .some((season) => season.number === number);
+    if (duplicatedNumber) {
+      throw new ValidationError("Ya existe una temporada con ese numero en la serie.");
+    }
+
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
       throw new ValidationError("El titulo de la temporada es obligatorio.");
@@ -49,8 +56,36 @@ export class SeasonService {
     return this.seasonRepository.findBySeriesId(seriesId);
   }
 
-  update(id: number, data: Partial<Omit<Season, "id" | "seriesId">>): Season {
-    const updated = this.seasonRepository.update(id, data);
+  update(id: number, data: Partial<Pick<Season, "number" | "title">>): Season {
+    const currentSeason = this.seasonRepository.findById(id);
+    if (!currentSeason) {
+      throw new NotFoundError("Temporada no encontrada para actualizar.");
+    }
+
+    if (data.number !== undefined) {
+      if (data.number <= 0) {
+        throw new ValidationError("El numero de temporada debe ser mayor a 0.");
+      }
+
+      const duplicatedNumber = this.seasonRepository
+        .findBySeriesId(currentSeason.seriesId)
+        .some((season) => season.id !== id && season.number === data.number);
+
+      if (duplicatedNumber) {
+        throw new ValidationError("Ya existe una temporada con ese numero en la serie.");
+      }
+    }
+
+    if (data.title !== undefined && !data.title.trim()) {
+      throw new ValidationError("El titulo de la temporada no puede estar vacio.");
+    }
+
+    const safeData: Partial<Pick<Season, "number" | "title">> = {
+      ...data,
+      title: data.title?.trim()
+    };
+
+    const updated = this.seasonRepository.update(id, safeData);
     if (!updated) {
       throw new NotFoundError("Temporada no encontrada para actualizar.");
     }

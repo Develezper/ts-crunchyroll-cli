@@ -1,4 +1,5 @@
 import { User } from "../../domain/entities/User";
+import { AuthorizationError } from "../errors";
 
 /**
  * Validates ADMIN role before privileged actions.
@@ -6,6 +7,6 @@ import { User } from "../../domain/entities/User";
  */
 export function validarAdmin(user: User | null | undefined): void {
   if (!user || user.rol !== "ADMIN") {
-    throw new Error("❌ No tienes permisos para esta acción. Se requiere rol ADMIN.");
+    throw new AuthorizationError("No tienes permisos para esta accion. Se requiere rol ADMIN.");
   }
 }

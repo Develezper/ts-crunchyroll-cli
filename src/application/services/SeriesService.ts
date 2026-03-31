@@ -1,5 +1,7 @@
 import { Series } from "../../domain/entities/Series";
 import type { CategoryRepository } from "../../domain/interfaces/CategoryRepository";
+import type { EpisodeRepository } from "../../domain/interfaces/EpisodeRepository";
+import type { SeasonRepository } from "../../domain/interfaces/SeasonRepository";
 import type { SeriesRepository } from "../../domain/interfaces/SeriesRepository";
 import { LogExecution } from "../../shared/decorators";
 import { NotFoundError, ValidationError } from "../../shared/errors";
@@ -8,7 +10,9 @@ import { generateId } from "../../shared/utils";
 export class SeriesService {
   constructor(
     private readonly seriesRepository: SeriesRepository,
-    private readonly categoryRepository: CategoryRepository
+    private readonly categoryRepository: CategoryRepository,
+    private readonly seasonRepository: SeasonRepository,
+    private readonly episodeRepository: EpisodeRepository
   ) {}
 
   @LogExecution("Crear serie")
@@ -66,6 +70,21 @@ export class SeriesService {
   }
 
   remove(id: number): void {
+    const series = this.seriesRepository.findById(id);
+    if (!series) {
+      throw new NotFoundError("Serie no encontrada para eliminar.");
+    }
+
+    // Keep data integrity by removing children before deleting parent series.
+    const seasons = this.seasonRepository.findBySeriesId(series.id);
+    for (const season of seasons) {
+      const episodes = this.episodeRepository.findBySeasonId(season.id);
+      for (const episode of episodes) {
+        this.episodeRepository.delete(episode.id);
+      }
+      this.seasonRepository.delete(season.id);
+    }
+
     const removed = this.seriesRepository.delete(id);
     if (!removed) {
       throw new NotFoundError("Serie no encontrada para eliminar.");

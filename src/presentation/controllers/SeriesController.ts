@@ -1,60 +1,66 @@
 import { SeriesService } from "../../application/services/SeriesService";
+import { BaseController } from "./BaseController";
 import { CommonView } from "../views/CommonView";
 import { SeriesView } from "../views/SeriesView";
 
-export class SeriesController {
-  constructor(private readonly seriesService: SeriesService) {}
+export class SeriesController extends BaseController {
+  constructor(private readonly seriesService: SeriesService) {
+    super();
+  }
 
   create(title: string, categoryId: number): void {
-    try {
-      const created = this.seriesService.create(title, categoryId);
-      CommonView.showSuccess("Serie creada correctamente.");
-      SeriesView.showItem(created);
-    } catch (error) {
-      CommonView.showError(error);
+    const created = this.execute(() => this.seriesService.create(title, categoryId));
+    if (!created) {
+      return;
     }
+
+    CommonView.showSuccess("Serie creada correctamente.");
+    SeriesView.showItem(created);
   }
 
   list(): void {
-    try {
-      SeriesView.showList(this.seriesService.findAll());
-    } catch (error) {
-      CommonView.showError(error);
+    const seriesList = this.execute(() => this.seriesService.findAll());
+    if (!seriesList) {
+      return;
     }
+
+    SeriesView.showList(seriesList);
   }
 
   getById(id: number): void {
-    try {
-      SeriesView.showItem(this.seriesService.findById(id));
-    } catch (error) {
-      CommonView.showError(error);
+    const series = this.execute(() => this.seriesService.findById(id));
+    if (!series) {
+      return;
     }
+
+    SeriesView.showItem(series);
   }
 
   listByCategory(categoryId: number): void {
-    try {
-      SeriesView.showList(this.seriesService.findByCategory(categoryId));
-    } catch (error) {
-      CommonView.showError(error);
+    const seriesList = this.execute(() => this.seriesService.findByCategory(categoryId));
+    if (!seriesList) {
+      return;
     }
+
+    SeriesView.showList(seriesList);
   }
 
   update(id: number, data: { title?: string; categoryId?: number }): void {
-    try {
-      const updated = this.seriesService.update(id, data);
-      CommonView.showSuccess("Serie actualizada correctamente.");
-      SeriesView.showItem(updated);
-    } catch (error) {
-      CommonView.showError(error);
+    const updated = this.execute(() => this.seriesService.update(id, data));
+    if (!updated) {
+      return;
     }
+
+    CommonView.showSuccess("Serie actualizada correctamente.");
+    SeriesView.showItem(updated);
   }
 
   remove(id: number): void {
-    try {
-      this.seriesService.remove(id);
-      CommonView.showSuccess(`Serie ${id} eliminada correctamente.`);
-    } catch (error) {
-      CommonView.showError(error);
+    const completed = this.run(() => this.seriesService.remove(id));
+    if (!completed) {
+      return;
     }
+
+    CommonView.showSuccess(`Serie ${id} eliminada correctamente.`);
   }
 }
