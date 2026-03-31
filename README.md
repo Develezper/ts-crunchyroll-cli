@@ -1,88 +1,67 @@
 # ts-crunchyroll-cli
 
-Base architecture for a console CRUD app in TypeScript, inspired by Clean Architecture and aligned with the activity requirements.
+Console CRUD project in TypeScript, structured with Clean Architecture principles.
 
-## Goal
-
-Build a CRUD for one main entity (for example, `Series`) with strict typing, classes, decorators, and clear separation of responsibilities.
-
-## Project Architecture
+## Current Architecture
 
 ```txt
 src/
-├── index.ts                          # Entry point (composition and CLI bootstrap)
-├── moduls.ts                         # Re-exports and reusable modules
-├── services.ts                       # Service/use-case access point
-├── data.ts                           # Mock data / in-memory seeds
-│
+├── index.ts
 ├── domain/
 │   ├── entities/
-│   │   └── index.ts                  # Domain classes
+│   │   ├── Category.ts
+│   │   ├── Season.ts
+│   │   ├── Episode.ts
+│   │   └── index.ts
 │   └── interfaces/
-│       └── index.ts                  # Contracts (repositories/ports)
-│
+│       ├── CategoryRepository.ts
+│       ├── SeasonRepository.ts
+│       ├── EpisodeRepository.ts
+│       └── index.ts
 ├── application/
 │   └── services/
-│       └── index.ts                  # Use cases / application logic
-│
+│       ├── CategoryService.ts
+│       ├── SeasonService.ts
+│       ├── EpisodeService.ts
+│       └── index.ts
 ├── infrastructure/
+│   ├── database/
+│   │   ├── inMemoryDb.ts
+│   │   └── index.ts
 │   └── repositories/
-│       └── index.ts                  # Concrete implementations (in-memory/JSON)
-│
+│       ├── InMemoryCategoryRepository.ts
+│       ├── InMemorySeasonRepository.ts
+│       ├── InMemoryEpisodeRepository.ts
+│       └── index.ts
 ├── presentation/
 │   ├── controllers/
-│   │   └── index.ts                  # CLI flow orchestration
+│   │   ├── CategoryController.ts
+│   │   ├── SeasonEpisodeController.ts
+│   │   └── index.ts
 │   └── views/
-│       └── index.ts                  # Console rendering
-│
+│       ├── CommonView.ts
+│       ├── CategoryView.ts
+│       ├── SeasonEpisodeView.ts
+│       └── index.ts
 └── shared/
     ├── decorators/
-    │   └── index.ts                  # Reusable decorators
+    │   ├── LogExecution.ts
+    │   └── index.ts
     ├── errors/
-    │   └── index.ts                  # Custom error types
+    │   ├── ValidationError.ts
+    │   ├── NotFoundError.ts
+    │   └── index.ts
     └── utils/
-        └── index.ts                  # Helpers and utilities
+        ├── generateId.ts
+        └── index.ts
 ```
 
-## Layer Rules
+## Language Rule
 
-- `domain`: no dependency on console, concrete repositories, or frameworks.
-- `application`: uses domain contracts to execute use cases.
-- `infrastructure`: implements contracts (for example, in-memory repository).
-- `presentation`: receives input and shows output; no business rules.
-- `shared`: cross-cutting reusable parts (decorators, errors, utils).
+- User-facing CLI output must be in Spanish.
+- Code and file names can stay in English.
 
-## Activity Requirements (Checklist)
-
-- Full CRUD: Create, Read, Update, Delete.
-- TypeScript classes to model entities.
-- At least one decorator (class or method).
-- Strict typing (no `any`).
-- Console execution.
-- Separation of responsibilities.
-
-## Language Rule for CLI
-
-- All user-facing CLI output (menus, prompts, success/error messages) must be in **Spanish**.
-- Internal code, file names, and architecture docs remain in English.
-
-## Recommended Implementation Flow
-
-1. Define entities and contracts in `domain`.
-2. Create initial typed data in `data.ts`.
-3. Implement repositories in `infrastructure`.
-4. Build use cases/services in `application`.
-5. Wire everything through `services.ts` and `moduls.ts`.
-6. Build CLI interaction in `presentation` and bootstrap in `index.ts`.
-
-## Team Work Split Suggestion
-
-- Person A: `domain` + contracts.
-- Person B: `infrastructure` + `data.ts`.
-- Person C: `application` + `services.ts`.
-- Person D: `presentation` + main flow in `index.ts`.
-
-## Useful Commands
+## Commands
 
 ```bash
 bun run src/index.ts
@@ -92,12 +71,8 @@ bun run src/index.ts
 npx tsc --noEmit
 ```
 
-## Note
-
-This scaffold is intentionally minimal: the goal is to guide the team with a clear structure before implementing the final logic.
-
 ## Team Guide
 
-For planning, roles, delivery flow, and presentation support, check:
+Project planning, ownership, and per-file responsibilities:
 
 - `TEAM_GUIDE_CRUD_CRUNCHYROLL.md`

@@ -1,7 +1,2 @@
-/**
- * CLI controllers.
- *
- * Rule: receive input, invoke services, and delegate output to views.
- */
-
-export {};
+export { CategoryController } from "./CategoryController";
+export { SeasonEpisodeController } from "./SeasonEpisodeController";

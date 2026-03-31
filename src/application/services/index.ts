@@ -1,7 +1,3 @@
-/**
- * Application use cases and services.
- *
- * Rule: orchestrate business logic through domain contracts.
- */
-
-export {};
+export { CategoryService } from "./CategoryService";
+export { SeasonService } from "./SeasonService";
+export { EpisodeService } from "./EpisodeService";

@@ -1,7 +1,2 @@
-/**
- * Custom application errors.
- *
- * Examples: ValidationError, NotFoundError, ForbiddenError.
- */
-
-export {};
+export { ValidationError } from "./ValidationError";
+export { NotFoundError } from "./NotFoundError";
