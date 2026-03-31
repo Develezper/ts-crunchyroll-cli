@@ -15,7 +15,7 @@ Implementar una aplicacion CLI que gestione:
 - Usuarios
 - Categorias
 - Series
-- Temporadas
+- Temporadas y episodios
 - (Opcional) favoritos y valoraciones
 
 Con operaciones CRUD:
@@ -82,7 +82,8 @@ src/
 
 - `User`: id, nombre, email, favoritos[]
 - `Category`: id, nombre
-- `Season`: id, numero, episodios
+- `Episode`: id, numero, titulo, duracionMin
+- `Season`: id, numero, episodios[]
 - `Series`: id, titulo, categoriaId, temporadas[]
 
 ### CRUD obligatorio minimo
@@ -146,18 +147,19 @@ Definition of Done:
 
 - Equipo listo para exponer sin improvisar.
 
-## 9. Roles sugeridos del equipo (3 personas)
+## 9. Roles sugeridos del equipo (3 personas, por dominio)
 
 | Rol | Responsabilidad principal | Entregable |
 |---|---|---|
-| Dev 1 - Arquitectura + Dominio | Estructura, entidades, contratos, estandares | Entidades y contratos listos + reglas de arquitectura |
-| Dev 2 - Aplicacion + Infraestructura | Servicios CRUD, validaciones, repositorios in-memory, seeds | Casos de uso funcionando + persistencia en memoria |
-| Dev 3 - CLI + QA/Docs | Controladores, vistas, mensajes en espanol, pruebas manuales y documentacion | Flujo completo por consola + checklist + guion de demo |
+| Dev 1 - Modulo Usuarios | CRUD de usuarios en todas las capas (domain, app, infra, presentation) | Modulo usuarios completo y probado |
+| Dev 2 - Modulo Series y Categorias | CRUD de series/categorias y relacion entre ambas | Modulo series/categorias completo y probado |
+| Dev 3 - Modulo Temporadas y Episodios | CRUD de temporadas/episodios y relacion con series | Modulo temporadas/episodios completo y probado |
 
 Regla de trabajo:
 
-- Cada dev es owner de su capa principal.
-- Si un cambio cruza capas, se coordina por PR/revision antes de merge.
+- Cada dev es owner de su dominio en todas las capas.
+- `src/index.ts`, `src/services.ts`, `src/moduls.ts` y `src/data.ts` se editan de forma coordinada.
+- Si un cambio cruza dominios, se coordina por PR/revision antes de merge.
 
 ## 10. Reglas de calidad del codigo
 
@@ -249,6 +251,7 @@ No meter reglas de negocio aqui.
 
 - `src/domain/entities/User.ts`
 - `src/domain/entities/Category.ts`
+- `src/domain/entities/Episode.ts`
 - `src/domain/entities/Season.ts`
 - `src/domain/entities/Series.ts`
 Responsabilidad: clases del dominio con propiedades y reglas basicas.
@@ -256,6 +259,8 @@ Responsabilidad: clases del dominio con propiedades y reglas basicas.
 - `src/domain/interfaces/UserRepository.ts`
 - `src/domain/interfaces/CategoryRepository.ts`
 - `src/domain/interfaces/SeriesRepository.ts`
+- `src/domain/interfaces/SeasonRepository.ts`
+- `src/domain/interfaces/EpisodeRepository.ts`
 Responsabilidad: contratos de persistencia (CRUD y consultas clave).
 
 ### Aplicacion
@@ -263,6 +268,8 @@ Responsabilidad: contratos de persistencia (CRUD y consultas clave).
 - `src/application/services/UserService.ts`
 - `src/application/services/CategoryService.ts`
 - `src/application/services/SeriesService.ts`
+- `src/application/services/SeasonService.ts`
+- `src/application/services/EpisodeService.ts`
 Responsabilidad: logica de negocio, validaciones y casos de uso.
 Aqui debe vivir el CRUD real.
 
@@ -271,6 +278,8 @@ Aqui debe vivir el CRUD real.
 - `src/infrastructure/repositories/InMemoryUserRepository.ts`
 - `src/infrastructure/repositories/InMemoryCategoryRepository.ts`
 - `src/infrastructure/repositories/InMemorySeriesRepository.ts`
+- `src/infrastructure/repositories/InMemorySeasonRepository.ts`
+- `src/infrastructure/repositories/InMemoryEpisodeRepository.ts`
 Responsabilidad: implementaciones concretas de los contratos.
 
 ### Presentacion (CLI)
@@ -278,10 +287,14 @@ Responsabilidad: implementaciones concretas de los contratos.
 - `src/presentation/controllers/MainController.ts`
 Responsabilidad: menu principal, routing de opciones y flujo.
 
+- `src/presentation/controllers/UserController.ts`
 - `src/presentation/controllers/SeriesController.ts`
-Responsabilidad: acciones CRUD de series desde input CLI.
+- `src/presentation/controllers/SeasonEpisodeController.ts`
+Responsabilidad: acciones CRUD por dominio desde input CLI.
 
+- `src/presentation/views/UserView.ts`
 - `src/presentation/views/SeriesView.ts`
+- `src/presentation/views/SeasonEpisodeView.ts`
 - `src/presentation/views/CommonView.ts`
 Responsabilidad: imprimir datos y mensajes en consola (siempre en espanol).
 
@@ -297,31 +310,70 @@ Responsabilidad: errores de dominio/aplicacion.
 - `src/shared/utils/generateId.ts`
 Responsabilidad: helper para IDs y utilidades puras.
 
-## 16. Distribucion de trabajo por rol (equipo de 3)
+## 16. Distribucion de trabajo por rol (equipo de 3, por dominio)
 
-- Dev 1 - Arquitectura + Dominio
-Archivos foco: `src/moduls.ts`, `src/services.ts`, `src/domain/entities/*`, `src/domain/interfaces/*`.
-Tarea: contratos, entidades, convenciones de naming y coherencia de capas.
+- Dev 1 - Usuarios
+Archivos foco:
+`src/domain/entities/User.ts`,
+`src/domain/interfaces/UserRepository.ts`,
+`src/application/services/UserService.ts`,
+`src/infrastructure/repositories/InMemoryUserRepository.ts`,
+`src/presentation/controllers/UserController.ts`,
+`src/presentation/views/UserView.ts`.
+Tambien actualiza su seccion en `src/data.ts`.
+Tarea: CRUD completo de usuarios + favoritos de usuario.
 
-- Dev 2 - Aplicacion + Infraestructura
-Archivos foco: `src/application/services/*`, `src/infrastructure/repositories/*`, `src/data.ts`, `src/shared/errors/*`, `src/shared/decorators/*`, `src/shared/utils/*`.
-Tarea: implementar CRUD, validaciones, decorador obligatorio y repositorios in-memory.
+- Dev 2 - Series y Categorias
+Archivos foco:
+`src/domain/entities/Series.ts`,
+`src/domain/entities/Category.ts`,
+`src/domain/interfaces/SeriesRepository.ts`,
+`src/domain/interfaces/CategoryRepository.ts`,
+`src/application/services/SeriesService.ts`,
+`src/application/services/CategoryService.ts`,
+`src/infrastructure/repositories/InMemorySeriesRepository.ts`,
+`src/infrastructure/repositories/InMemoryCategoryRepository.ts`,
+`src/presentation/controllers/SeriesController.ts`,
+`src/presentation/views/SeriesView.ts`.
+Tambien actualiza su seccion en `src/data.ts`.
+Tarea: CRUD completo de series/categorias + filtros por categoria.
 
-- Dev 3 - CLI + QA/Docs
-Archivos foco: `src/presentation/controllers/*`, `src/presentation/views/*`, `src/index.ts`, `README.md`, esta guia.
-Tarea: menu/flujo de consola en espanol, pruebas manuales end-to-end y documentacion final.
+- Dev 3 - Temporadas y Episodios
+Archivos foco:
+`src/domain/entities/Season.ts`,
+`src/domain/entities/Episode.ts`,
+`src/domain/interfaces/SeasonRepository.ts`,
+`src/domain/interfaces/EpisodeRepository.ts`,
+`src/application/services/SeasonService.ts`,
+`src/application/services/EpisodeService.ts`,
+`src/infrastructure/repositories/InMemorySeasonRepository.ts`,
+`src/infrastructure/repositories/InMemoryEpisodeRepository.ts`,
+`src/presentation/controllers/SeasonEpisodeController.ts`,
+`src/presentation/views/SeasonEpisodeView.ts`.
+Tambien actualiza su seccion en `src/data.ts`.
+Tarea: CRUD completo de temporadas/episodios e integracion con series.
+
+Archivos compartidos (coordinados por los 3):
+
+- `src/index.ts` (flujo principal del menu)
+- `src/services.ts` (wiring/composicion de servicios)
+- `src/moduls.ts` (re-exports)
+- `src/shared/decorators/LogExecution.ts` (decorador obligatorio)
+- `src/shared/errors/*` y `src/shared/utils/*` (convenciones comunes)
+- `README.md` y esta guia (documentacion final)
 
 ## 17. Mini cronograma sugerido (3 personas)
 
 - Dia 1
-Dev 1: entidades + interfaces.
-Dev 2: repositorios + seeds.
-Dev 3: estructura de menu y vistas base.
+Dev 1: entidades/interfaces de usuarios.
+Dev 2: entidades/interfaces de series/categorias.
+Dev 3: entidades/interfaces de temporadas/episodios.
 
 - Dia 2
-Dev 1: revision de arquitectura e integracion de contratos.
-Dev 2: CRUD completo + validaciones + decorador.
-Dev 3: conectar controladores con servicios y pruebas manuales.
+Dev 1: repositorio + servicio + controlador/view de usuarios.
+Dev 2: repositorio + servicio + controlador/view de series/categorias.
+Dev 3: repositorio + servicio + controlador/view de temporadas/episodios.
 
 - Dia 3
-Todos: hardening final, demo de sustentacion y cierre de documentacion.
+Todos: integracion en `index.ts/services.ts`, pruebas E2E por consola,
+demo de sustentacion y cierre de documentacion.
