@@ -1,14 +1,23 @@
 import { Episode } from "../../domain/entities/Episode";
 import type { EpisodeRepository } from "../../domain/interfaces/EpisodeRepository";
+import type { SeasonRepository } from "../../domain/interfaces/SeasonRepository";
 import { NotFoundError, ValidationError } from "../../shared/errors";
 import { generateId } from "../../shared/utils";
 import { LogExecution } from "../../shared/decorators";
 
 export class EpisodeService {
-  constructor(private readonly episodeRepository: EpisodeRepository) {}
+  constructor(
+    private readonly episodeRepository: EpisodeRepository,
+    private readonly seasonRepository: SeasonRepository
+  ) {}
 
   @LogExecution("Crear episodio")
   create(seasonId: number, number: number, title: string, durationMin: number): Episode {
+    const season = this.seasonRepository.findById(seasonId);
+    if (!season) {
+      throw new NotFoundError("La temporada indicada no existe.");
+    }
+
     if (number <= 0) {
       throw new ValidationError("El numero de episodio debe ser mayor a 0.");
     }

@@ -15,7 +15,7 @@ const episodeRepository = new InMemoryEpisodeRepository();
 
 const categoryService = new CategoryService(categoryRepository);
 const seasonService = new SeasonService(seasonRepository, episodeRepository);
-const episodeService = new EpisodeService(episodeRepository);
+const episodeService = new EpisodeService(episodeRepository, seasonRepository);
 
 const categoryController = new CategoryController(categoryService);
 const seasonEpisodeController = new SeasonEpisodeController(seasonService, episodeService);
