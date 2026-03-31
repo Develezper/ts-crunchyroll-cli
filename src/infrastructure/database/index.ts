@@ -1,1 +1,1 @@
-export { categoriesTable, seriesTable, seasonsTable, episodesTable } from "./inMemoryDb";
+export { categoriesTable, seasonsTable, episodesTable } from "./inMemoryDb";

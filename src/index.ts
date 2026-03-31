@@ -1,27 +1,23 @@
-import { CategoryService, EpisodeService, SeasonService, SeriesService } from "./application/services";
+import { CategoryService, EpisodeService, SeasonService } from "./application/services";
 import {
   InMemoryCategoryRepository,
   InMemoryEpisodeRepository,
-  InMemorySeasonRepository,
-  InMemorySeriesRepository
+  InMemorySeasonRepository
 } from "./infrastructure/repositories";
-import { CategoryController, SeasonEpisodeController, SeriesController } from "./presentation/controllers";
+import { CategoryController, SeasonEpisodeController } from "./presentation/controllers";
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 
 // Composition root: wire concrete infrastructure to application services.
 const categoryRepository = new InMemoryCategoryRepository();
-const seriesRepository = new InMemorySeriesRepository();
 const seasonRepository = new InMemorySeasonRepository();
 const episodeRepository = new InMemoryEpisodeRepository();
 
 const categoryService = new CategoryService(categoryRepository);
-const seriesService = new SeriesService(seriesRepository, categoryRepository);
 const seasonService = new SeasonService(seasonRepository);
 const episodeService = new EpisodeService(episodeRepository);
 
 const categoryController = new CategoryController(categoryService);
-const seriesController = new SeriesController(seriesService);
 const seasonEpisodeController = new SeasonEpisodeController(seasonService, episodeService);
 
 function parseNumber(value: string): number | null {
@@ -61,12 +57,6 @@ async function bootstrapCli(): Promise<void> {
     console.log("12. Actualizar episodio");
     console.log("13. Eliminar episodio");
     console.log("14. Listar todos los episodios");
-    console.log("15. Listar series");
-    console.log("16. Crear serie");
-    console.log("17. Buscar serie por ID");
-    console.log("18. Actualizar serie");
-    console.log("19. Eliminar serie");
-    console.log("20. Filtrar series por categoría");
     console.log("0. Salir");
 
     const option = (await rl.question("\nSelecciona una opción: ")).trim();
@@ -244,77 +234,6 @@ async function bootstrapCli(): Promise<void> {
 
     if (option === "14") {
       seasonEpisodeController.listAllEpisodes();
-      continue;
-    }
-
-    if (option === "15") {
-      seriesController.list();
-      continue;
-    }
-
-    if (option === "16") {
-      const title = await rl.question("Titulo de la serie: ");
-      const categoryId = parseNumber(await rl.question("ID de la categoria: "));
-      if (categoryId === null) {
-        console.log("❌ ID de categoria inválido.");
-        continue;
-      }
-      seriesController.create(title, categoryId);
-      continue;
-    }
-
-    if (option === "17") {
-      const id = parseNumber(await rl.question("ID de la serie: "));
-      if (id === null) {
-        console.log("❌ ID inválido.");
-        continue;
-      }
-      seriesController.getById(id);
-      continue;
-    }
-
-    if (option === "18") {
-      const id = parseNumber(await rl.question("ID de la serie a actualizar: "));
-      if (id === null) {
-        console.log("❌ ID inválido.");
-        continue;
-      }
-      const title = await rl.question("Nuevo titulo (enter para omitir): ");
-      const categoryIdRaw = await rl.question("Nuevo ID de categoria (enter para omitir): ");
-      const categoryId = categoryIdRaw.trim() ? parseNumber(categoryIdRaw) : undefined;
-      if (categoryIdRaw.trim() && categoryId === null) {
-        console.log("❌ ID de categoria inválido.");
-        continue;
-      }
-      const safeCategoryId = categoryId === null ? undefined : categoryId;
-      seriesController.update(id, {
-        title: title.trim() ? title.trim() : undefined,
-        categoryId: safeCategoryId
-      });
-      continue;
-    }
-
-    if (option === "19") {
-      const id = parseNumber(await rl.question("ID de la serie a eliminar: "));
-      if (id === null) {
-        console.log("❌ ID inválido.");
-        continue;
-      }
-      if (!(await confirmDeletion(rl, `la serie ${id}`))) {
-        console.log("ℹ️ Eliminación cancelada.");
-        continue;
-      }
-      seriesController.remove(id);
-      continue;
-    }
-
-    if (option === "20") {
-      const categoryId = parseNumber(await rl.question("ID de la categoria: "));
-      if (categoryId === null) {
-        console.log("❌ ID de categoria inválido.");
-        continue;
-      }
-      seriesController.listByCategory(categoryId);
       continue;
     }
 

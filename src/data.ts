@@ -1,3 +1,4 @@
+import { Category, Series } from "./domain/entities";
 import { User } from "./domain/entities/User";
 import { setGenerarId } from "./shared/utils/generateId";
 
@@ -25,5 +26,13 @@ export const usersData: User[] = [
     fechaCreacion: new Date("2026-02-01T10:00:00.000Z")
   })
 ];
+
+export const categories: Category[] = [
+  new Category(1, "Acción", "Series con alto ritmo y combates"),
+  new Category(2, "Romance", "Historias centradas en relaciones"),
+  new Category(3, "Isekai", "Protagonistas transportados a otro mundo")
+];
+
+export const series: Series[] = [new Series("1", "Chainsaw Man", "1"), new Series("2", "Frieren", "3")];
 
 setGenerarId(3);
