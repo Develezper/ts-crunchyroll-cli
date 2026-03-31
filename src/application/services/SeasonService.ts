@@ -1,11 +1,15 @@
 import { Season } from "../../domain/entities/Season";
+import type { EpisodeRepository } from "../../domain/interfaces/EpisodeRepository";
 import type { SeasonRepository } from "../../domain/interfaces/SeasonRepository";
 import { NotFoundError, ValidationError } from "../../shared/errors";
 import { generateId } from "../../shared/utils";
 import { LogExecution } from "../../shared/decorators";
 
 export class SeasonService {
-  constructor(private readonly seasonRepository: SeasonRepository) {}
+  constructor(
+    private readonly seasonRepository: SeasonRepository,
+    private readonly episodeRepository: EpisodeRepository
+  ) {}
 
   @LogExecution("Crear temporada")
   create(seriesId: number, number: number, title: string): Season {
@@ -40,6 +44,12 @@ export class SeasonService {
   }
 
   remove(id: number): void {
+    // Cascade delete to prevent orphan episodes when a season is removed.
+    const episodes = this.episodeRepository.findBySeasonId(id);
+    for (const episode of episodes) {
+      this.episodeRepository.delete(episode.id);
+    }
+
     const removed = this.seasonRepository.delete(id);
     if (!removed) {
       throw new NotFoundError("Temporada no encontrada para eliminar.");
