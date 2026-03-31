@@ -3,47 +3,47 @@ import { User } from "../entities/User";
 
 export interface IUserRepository {
     /**
-     * Obtiene todos los usuarios, opcionalmente filtrando por estado activo
+     * Returns all users, optionally filtered by active status.
      */
     findAll(onlyActive?: boolean): Promise<User[]>;
 
     /**
-     * Busca un usuario por ID
+     * Finds a user by ID.
      */
     findById(id: number): Promise<User | null>;
 
     /**
-     * Busca un usuario por email (util para login y validaciones)
+     * Finds a user by email (useful for login and validation).
      */
     findByEmail(email: string): Promise<User | null>;
 
     /**
-     * Crea un nuevo usuario
+     * Creates a new user.
      */
     create(userProps: Omit<UserProps, "id" | "fechaCreacion" | "favoritos" | "historial" | "activo">): Promise<User>;
 
     /**
-     * Actualiza propiedades de un usuario existente
+     * Updates properties of an existing user.
      */
     update(id: number, data: Partial<UserProps>): Promise<User | null>;
 
     /**
-     * Agrega un id de serie a los favoritos del usuario
+     * Adds a series ID to the user's favorites.
      */
     addFavorite(userId: number, seriesId: number): Promise<void>;
 
     /**
-     * Agrega un id de serie al historial de visualización del usuario
+     * Adds a series ID to the user's watch history.
      */
     addToHistory(userId: number, seriesId: number): Promise<void>;
 
     /**
-     * Eliminación lógica de un usuario (activo = false)
+     * Soft deletes a user (active = false).
      */
     softDelete(id: number): Promise<boolean>;
 
     /**
-     * Eliminación física (opcional, por si el Admin lo requiere)
+     * Hard deletes a user (optional, if an admin requires it).
      */
     delete(id: number): Promise<boolean>;
 }

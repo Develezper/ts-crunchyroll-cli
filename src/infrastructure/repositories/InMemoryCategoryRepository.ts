@@ -22,6 +22,7 @@ export class InMemoryCategoryRepository implements CategoryRepository {
       return undefined;
     }
 
+    // In-memory update mutates the same reference used by callers.
     Object.assign(category, data);
     return category;
   }

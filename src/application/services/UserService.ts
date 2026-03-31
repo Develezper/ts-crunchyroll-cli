@@ -10,7 +10,7 @@ export class UserService {
     @LogExecution()
     async login(email: string, password?: string): Promise<User> {
         const user = await this.userRepository.findByEmail(email);
-        // Validacion
+        // Validation
         if (!user || !user.activo) {
             throw new Error("Credenciales inválidas o usuario inactivo");
         }
@@ -25,7 +25,8 @@ export class UserService {
 
     @LogExecution()
     async createUser(adminUser: User, data: Omit<UserProps, "id" | "fechaCreacion" | "favoritos" | "historial" | "activo">): Promise<User> {
-        validarAdmin(adminUser); // Solo admins pueden crear explícitamente usuarios si la regla aplica
+        // Only admins can create users explicitly when this rule applies
+        validarAdmin(adminUser);
 
         const exist = await this.userRepository.findByEmail(data.email);
         if (exist) {
