@@ -222,3 +222,103 @@ npx tsc --noEmit
 - Tipado estricto sin `any`.
 - Estructura por capas respetada.
 - README y guia de equipo actualizados.
+
+## 15. Mapa exacto de archivos (que va en cada uno)
+
+Esta seccion define la solucion esperada archivo por archivo.
+
+### Archivos raiz de `src` (obligatorios)
+
+- `src/index.ts`
+Responsabilidad: entry point. Levanta dependencias y ejecuta el menu CLI.
+No debe contener logica de negocio compleja.
+
+- `src/moduls.ts`
+Responsabilidad: re-exports centrales para simplificar imports.
+Ejemplo: exportar controladores, servicios, errores y utilidades.
+
+- `src/services.ts`
+Responsabilidad: composition root de servicios/casos de uso.
+Aqui se conectan interfaces + repositorios concretos.
+
+- `src/data.ts`
+Responsabilidad: seeds in-memory tipados (usuarios, categorias, series).
+No meter reglas de negocio aqui.
+
+### Dominio
+
+- `src/domain/entities/User.ts`
+- `src/domain/entities/Category.ts`
+- `src/domain/entities/Season.ts`
+- `src/domain/entities/Series.ts`
+Responsabilidad: clases del dominio con propiedades y reglas basicas.
+
+- `src/domain/interfaces/UserRepository.ts`
+- `src/domain/interfaces/CategoryRepository.ts`
+- `src/domain/interfaces/SeriesRepository.ts`
+Responsabilidad: contratos de persistencia (CRUD y consultas clave).
+
+### Aplicacion
+
+- `src/application/services/UserService.ts`
+- `src/application/services/CategoryService.ts`
+- `src/application/services/SeriesService.ts`
+Responsabilidad: logica de negocio, validaciones y casos de uso.
+Aqui debe vivir el CRUD real.
+
+### Infraestructura
+
+- `src/infrastructure/repositories/InMemoryUserRepository.ts`
+- `src/infrastructure/repositories/InMemoryCategoryRepository.ts`
+- `src/infrastructure/repositories/InMemorySeriesRepository.ts`
+Responsabilidad: implementaciones concretas de los contratos.
+
+### Presentacion (CLI)
+
+- `src/presentation/controllers/MainController.ts`
+Responsabilidad: menu principal, routing de opciones y flujo.
+
+- `src/presentation/controllers/SeriesController.ts`
+Responsabilidad: acciones CRUD de series desde input CLI.
+
+- `src/presentation/views/SeriesView.ts`
+- `src/presentation/views/CommonView.ts`
+Responsabilidad: imprimir datos y mensajes en consola (siempre en espanol).
+
+### Compartido
+
+- `src/shared/decorators/LogExecution.ts`
+Responsabilidad: decorador para log de metodos CRUD.
+
+- `src/shared/errors/NotFoundError.ts`
+- `src/shared/errors/ValidationError.ts`
+Responsabilidad: errores de dominio/aplicacion.
+
+- `src/shared/utils/generateId.ts`
+Responsabilidad: helper para IDs y utilidades puras.
+
+## 16. Distribucion de trabajo por rol (archivos concretos)
+
+- Arquitecto / TL
+Archivos foco: `src/services.ts`, `src/moduls.ts`, `README.md`, esta guia.
+Tarea: definir contratos, naming y reglas de calidad.
+
+- Domain Dev
+Archivos foco: `src/domain/entities/*`, `src/domain/interfaces/*`.
+Tarea: clases y contratos limpios, sin dependencias externas.
+
+- Infrastructure Dev
+Archivos foco: `src/data.ts`, `src/infrastructure/repositories/*`.
+Tarea: repositorios in-memory y carga de datos semilla.
+
+- Application Dev
+Archivos foco: `src/application/services/*`, `src/shared/errors/*`.
+Tarea: CRUD + validaciones + manejo de errores.
+
+- CLI Dev
+Archivos foco: `src/presentation/controllers/*`, `src/presentation/views/*`, `src/index.ts`.
+Tarea: flujo por consola y mensajes en espanol.
+
+- QA/Doc Dev
+Archivos foco: `README.md`, esta guia, evidencia de pruebas.
+Tarea: checklist final, casos de prueba manuales y guion de demo.
