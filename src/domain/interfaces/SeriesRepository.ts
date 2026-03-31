@@ -1,12 +1,10 @@
-// We use "import type" because SeriesRepository is an interface
-import type { Series } from '../entities/Series';
+import type { Series } from "../entities/Series";
 
-// This interface is like a "contract" that says what a Series Repository must do
 export interface SeriesRepository {
-  save(series: Series): void;
-  findById(id: string): Series | null;
+  create(series: Series): Series;
   findAll(): Series[];
-  update(id: string, series: Partial<Series>): void;
-  delete(id: string): void;
-  findByCategory(categoryId: string): Series[];
+  findById(id: number): Series | undefined;
+  findByCategoryId(categoryId: number): Series[];
+  update(id: number, data: Partial<Omit<Series, "id">>): Series | undefined;
+  delete(id: number): boolean;
 }

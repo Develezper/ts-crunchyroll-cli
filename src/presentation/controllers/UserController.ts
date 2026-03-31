@@ -1,80 +1,85 @@
+import type { Rol, User } from "../../domain/entities/User";
 import { UserService } from "../../application/services/UserService";
+import { CommonView } from "../views/CommonView";
 import { UserView } from "../views/UserView";
-import { User } from "../../domain/entities/User";
 
 export class UserController {
-    constructor(
-        private readonly userService: UserService,
-        private readonly view: UserView
-    ) { }
+  constructor(private readonly userService: UserService) {}
 
-    async start(currentUser: User): Promise<void> {
-        let exit = false;
-
-        this.view.printSuccess(`Bienvenido/a, ${currentUser.nombre} (${currentUser.rol})`);
-
-        while (!exit) {
-            this.view.printMenu();
-            const option = await this.view.ask("Seleccione una opción: ");
-
-            try {
-                switch (option.trim()) {
-                    case "1": {
-                        const nombre = await this.view.ask("Nombre: ");
-                        const email = await this.view.ask("Email: ");
-                        const password = await this.view.ask("Contraseña: ");
-                        const rawRol = await this.view.ask("Rol (ADMIN / USER): ");
-                        const rol = rawRol.toUpperCase() === "ADMIN" ? "ADMIN" : "USER";
-
-                        await this.userService.createUser(currentUser, { nombre, email, password, rol });
-                        this.view.printSuccess("Usuario creado correctamente.");
-                        break;
-                    }
-                    case "2": {
-                        const users = await this.userService.getAllActiveUsers(currentUser);
-                        this.view.printUsers(users);
-                        break;
-                    }
-                    case "3": {
-                        this.view.printProfile(currentUser);
-                        break;
-                    }
-                    case "4": {
-                        const idToDelete = await this.view.ask("ID del usuario a eliminar: ");
-                        const success = await this.userService.softDeleteUser(currentUser, Number(idToDelete));
-                        if (success) {
-                            this.view.printSuccess("Usuario eliminado (Borrado lógico) exitosamente.");
-                        } else {
-                            this.view.printError("Usuario no encontrado.");
-                        }
-                        break;
-                    }
-                    case "5": {
-                        const seriesId = await this.view.ask("ID de la serie a favoritos: ");
-                        await this.userService.addFavorite(currentUser.id, Number(seriesId));
-                        this.view.printSuccess("Serie agregada a favoritos.");
-                        break;
-                    }
-                    case "6": {
-                        const seriesId = await this.view.ask("ID de la serie a historial: ");
-                        await this.userService.watchSeries(currentUser.id, Number(seriesId));
-                        this.view.printSuccess("Serie agregada al historial de visualización.");
-                        break;
-                    }
-                    case "0":
-                        exit = true;
-                        this.view.printSuccess("Saliendo del módulo Usuarios...");
-                        break;
-                    default:
-                        this.view.printError("Opción inválida. Intente de nuevo.");
-                }
-            } catch (err: any) {
-                this.view.printError(err.message);
-            }
-        }
+  async create(
+    currentUser: User,
+    data: { nombre: string; email: string; password: string; rol: Rol }
+  ): Promise<void> {
+    try {
+      const created = await this.userService.createUser(currentUser, data);
+      CommonView.showSuccess("Usuario creado correctamente.");
+      UserView.showItem(created);
+    } catch (error) {
+      CommonView.showError(error);
     }
+  }
 
-    closeView(): void {
-        this.view.close();
+  async listActive(currentUser: User): Promise<void> {
+    try {
+      const users = await this.userService.getAllActiveUsers(currentUser);
+      UserView.showList(users);
+    } catch (error) {
+      CommonView.showError(error);
     }
+  }
+
+  showProfile(currentUser: User): void {
+    UserView.showItem(currentUser);
+  }
+
+  async update(
+    currentUser: User,
+    id: number,
+    data: { nombre?: string; email?: string; rol?: Rol }
+  ): Promise<void> {
+    try {
+      const updated = await this.userService.updateUser(currentUser, id, data);
+      if (!updated) {
+        CommonView.showError(new Error("Usuario no encontrado para actualizar."));
+        return;
+      }
+
+      CommonView.showSuccess("Usuario actualizado correctamente.");
+      UserView.showItem(updated);
+    } catch (error) {
+      CommonView.showError(error);
+    }
+  }
+
+  async remove(currentUser: User, id: number): Promise<void> {
+    try {
+      const removed = await this.userService.softDeleteUser(currentUser, id);
+      if (!removed) {
+        CommonView.showError(new Error("Usuario no encontrado para eliminar."));
+        return;
+      }
+
+      CommonView.showSuccess(`Usuario ${id} eliminado correctamente (borrado lógico).`);
+    } catch (error) {
+      CommonView.showError(error);
+    }
+  }
+
+  async addFavorite(userId: number, seriesId: number): Promise<void> {
+    try {
+      await this.userService.addFavorite(userId, seriesId);
+      CommonView.showSuccess("Serie agregada a favoritos.");
+    } catch (error) {
+      CommonView.showError(error);
+    }
+  }
+
+  async addHistory(userId: number, seriesId: number): Promise<void> {
+    try {
+      await this.userService.watchSeries(userId, seriesId);
+      CommonView.showSuccess("Serie agregada al historial de visualización.");
+    } catch (error) {
+      CommonView.showError(error);
+    }
+  }
 }

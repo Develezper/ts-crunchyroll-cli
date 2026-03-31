@@ -35,13 +35,11 @@ Implementado:
 
 - users
 - categories
+- series
 - seasons
 - episodes
 
-Pendiente principal:
-
-- completar flujo completo de series (`service`, `repository`, `controller`, `view`)
-- consolidar menú interactivo CRUD en `src/index.ts`
+Todo el CRUD principal está disponible desde el menú interactivo en `src/index.ts`.
 
 ## Regla de idioma
 
@@ -61,4 +59,3 @@ npx tsc --noEmit
 ## Documentación del equipo
 
 - Guía operativa completa: `TEAM_GUIDE_CRUD_CRUNCHYROLL.md`
-- Resumen de arranque rápido: `GUIA.md`

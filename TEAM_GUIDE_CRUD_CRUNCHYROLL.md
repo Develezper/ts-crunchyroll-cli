@@ -91,6 +91,7 @@ src/
 │       ├── CategoryService.ts
 │       ├── EpisodeService.ts
 │       ├── SeasonService.ts
+│       ├── SeriesService.ts
 │       ├── UserService.ts
 │       └── index.ts
 ├── infrastructure/
@@ -101,6 +102,7 @@ src/
 │       ├── InMemoryCategoryRepository.ts
 │       ├── InMemoryEpisodeRepository.ts
 │       ├── InMemorySeasonRepository.ts
+│       ├── InMemorySeriesRepository.ts
 │       ├── InMemoryUserRepository.ts
 │       ├── JsonUserRepository.ts
 │       └── index.ts
@@ -108,12 +110,14 @@ src/
 │   ├── controllers/
 │   │   ├── CategoryController.ts
 │   │   ├── SeasonEpisodeController.ts
+│   │   ├── SeriesController.ts
 │   │   ├── UserController.ts
 │   │   └── index.ts
 │   └── views/
 │       ├── CategoryView.ts
 │       ├── CommonView.ts
 │       ├── SeasonEpisodeView.ts
+│       ├── SeriesView.ts
 │       ├── UserView.ts
 │       └── index.ts
 └── shared/
@@ -143,12 +147,8 @@ src/
 
 ### Pendiente por completar
 
-- Flujo completo de series en todas las capas:
-  - `SeriesService.ts`
-  - `InMemorySeriesRepository.ts`
-  - `SeriesController.ts`
-  - `SeriesView.ts`
-- Menú interactivo completo de CLI en `src/index.ts` (ahora hay demo script)
+- Endurecer pruebas manuales de regresión antes de la entrega final.
+- (Opcional) Añadir pruebas automatizadas.
 
 ---
 
@@ -214,7 +214,7 @@ Campos principales:
 | Categories | Sí | Sí | Sí | Sí | Implementado |
 | Seasons | Sí | Sí | Sí | Sí | Implementado |
 | Episodes | Sí | Sí | Sí | Sí | Implementado |
-| Series | Pendiente | Parcial | Pendiente | Pendiente | Por completar |
+| Series | Sí | Sí | Sí | Sí | Implementado |
 
 ---
 
