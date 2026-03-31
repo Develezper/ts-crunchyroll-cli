@@ -11,7 +11,7 @@ import type { SeriesRepository } from '../../domain/interfaces/SeriesRepository'
 import type { CategoryRepository } from '../../domain/interfaces/CategoryRepository';
 
 // Import the actual data arrays
-import { series as seriesData, categories as categoriesData } from '../../data';
+import { series as seriesData, categories as categoriesData } from "../../data.ts";
 
 // Implementation of Series storage in memory
 export class InMemorySeriesRepository implements SeriesRepository {
