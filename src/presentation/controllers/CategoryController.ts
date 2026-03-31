@@ -7,10 +7,12 @@ export class CategoryController {
 
   create(name: string, description: string): void {
     try {
+      // Controller delegates business rules to the service and only coordinates I/O.
       const created = this.categoryService.create(name, description);
       CommonView.showSuccess("Categoria creada correctamente.");
       CategoryView.showItem(created);
     } catch (error) {
+      // Single error boundary for this use case path in the presentation layer.
       CommonView.showError(error);
     }
   }
