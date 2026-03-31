@@ -29,6 +29,14 @@ function bootstrapDemo(): void {
   categoryController.list();
 
   console.log("\n=== DEMO TEMPORADAS / EPISODIOS ===");
+  seasonEpisodeController.createSeason(101, 2, "Temporada 2");
+  seasonEpisodeController.listSeasons();
+  seasonEpisodeController.updateSeason(1, { title: "Temporada 1 Remasterizada" });
+  seasonEpisodeController.createEpisode(1, 3, "La revancha", 25);
+  seasonEpisodeController.listEpisodesBySeason(1);
+  seasonEpisodeController.updateEpisode(1, { title: "El comienzo (Edicion extendida)" });
+  seasonEpisodeController.removeEpisode(2);
+  seasonEpisodeController.removeSeason(2);
   seasonEpisodeController.listSeasons();
   seasonEpisodeController.listEpisodesBySeason(1);
 }
