@@ -9,15 +9,18 @@ export class CategoryService {
 
   @LogExecution("Crear categoria")
   create(name: string, description: string): Category {
+    // Normalize and validate user input before touching persistence.
     const trimmedName = name.trim();
     if (!trimmedName) {
       throw new ValidationError("El nombre de la categoria es obligatorio.");
     }
 
+    // Enforce a business invariant: category name must be unique.
     if (this.categoryRepository.existsByName(trimmedName)) {
       throw new ValidationError("Ya existe una categoria con ese nombre.");
     }
 
+    // ID is generated from current persisted data to keep it deterministic in-memory.
     const id = generateId(this.categoryRepository.findAll());
     return this.categoryRepository.create(new Category(id, trimmedName, description.trim()));
   }
