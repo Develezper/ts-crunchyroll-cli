@@ -26,35 +26,38 @@ import { stdin as input, stdout as output } from "node:process";
 type CliInterface = ReturnType<typeof createInterface>;
 type MenuAction = (rl: CliInterface) => Promise<void>;
 
-const MENU_OPTIONS: readonly string[] = [
-  "1. Listar categorías",
-  "2. Crear categoría",
-  "3. Buscar categoría por ID",
-  "4. Actualizar categoría",
-  "5. Eliminar categoría",
-  "6. Listar series",
-  "7. Crear serie",
-  "8. Buscar serie por ID",
-  "9. Actualizar serie",
-  "10. Eliminar serie",
-  "11. Filtrar series por categoría",
-  "12. Listar temporadas",
-  "13. Crear temporada",
-  "14. Actualizar temporada",
-  "15. Eliminar temporada",
-  "16. Listar episodios por temporada",
-  "17. Crear episodio",
-  "18. Actualizar episodio",
-  "19. Eliminar episodio",
-  "20. Listar todos los episodios",
-  "21. Listar usuarios activos",
-  "22. Crear usuario",
-  "23. Actualizar usuario",
-  "24. Eliminar usuario (borrado lógico)",
-  "0. Salir"
-];
+const INVALID_ID = "❌ ID inválido.";
+const INVALID_ROLE = "❌ Rol inválido. Debe ser ADMIN o USER.";
+const INVALID_NUMERIC_DATA = "❌ Datos numéricos inválidos.";
 
-// Composition root: one place to wire concrete dependencies.
+const MENU_TEXT = `===== MENÚ PRINCIPAL =====
+1. Listar categorías
+2. Crear categoría
+3. Buscar categoría por ID
+4. Actualizar categoría
+5. Eliminar categoría
+6. Listar series
+7. Crear serie
+8. Buscar serie por ID
+9. Actualizar serie
+10. Eliminar serie
+11. Filtrar series por categoría
+12. Listar temporadas
+13. Crear temporada
+14. Actualizar temporada
+15. Eliminar temporada
+16. Listar episodios por temporada
+17. Crear episodio
+18. Actualizar episodio
+19. Eliminar episodio
+20. Listar todos los episodios
+21. Listar usuarios activos
+22. Crear usuario
+23. Actualizar usuario
+24. Eliminar usuario (borrado lógico)
+0. Salir`;
+
+// Composition root.
 const categoryRepository = new InMemoryCategoryRepository();
 const seriesRepository = new InMemorySeriesRepository();
 const seasonRepository = new InMemorySeasonRepository();
@@ -103,83 +106,49 @@ function parseOptionalRole(rawRole: string): Rol | undefined | null {
   return normalized === "ADMIN" || normalized === "USER" ? normalized : null;
 }
 
-function printMenu(): void {
-  console.log("\n===== MENÚ PRINCIPAL =====");
-  for (const option of MENU_OPTIONS) {
-    console.log(option);
+async function askRequiredNumber(
+  rl: CliInterface,
+  prompt: string,
+  invalidMessage: string
+): Promise<number | null> {
+  const value = parseNumber(await rl.question(prompt));
+  if (value === null) {
+    console.log(invalidMessage);
   }
-}
-
-async function askNumber(rl: CliInterface, prompt: string): Promise<number | null> {
-  return parseNumber(await rl.question(prompt));
+  return value;
 }
 
 async function askOptionalNumber(
   rl: CliInterface,
-  prompt: string
-): Promise<number | undefined | null> {
-  const raw = (await rl.question(prompt)).trim();
-  return raw ? parseNumber(raw) : undefined;
-}
-
-async function readRequiredNumber(
-  rl: CliInterface,
   prompt: string,
   invalidMessage: string
-): Promise<number | undefined> {
-  const value = await askNumber(rl, prompt);
+): Promise<number | undefined | null> {
+  const rawValue = (await rl.question(prompt)).trim();
+  if (!rawValue) {
+    return undefined;
+  }
+
+  const value = parseNumber(rawValue);
   if (value === null) {
     console.log(invalidMessage);
-    return undefined;
   }
 
   return value;
 }
 
-async function withRequiredNumber(
-  rl: CliInterface,
-  prompt: string,
-  invalidMessage: string,
-  onSuccess: (value: number) => void | Promise<void>
-): Promise<void> {
-  const value = await readRequiredNumber(rl, prompt, invalidMessage);
-  if (value === undefined) {
-    return;
-  }
-
-  await onSuccess(value);
-}
-
-async function withOptionalNumber(
-  rl: CliInterface,
-  prompt: string,
-  invalidMessage: string,
-  onSuccess: (value: number | undefined) => void | Promise<void>
-): Promise<void> {
-  const value = await askOptionalNumber(rl, prompt);
-  if (value === null) {
-    console.log(invalidMessage);
-    return;
-  }
-
-  await onSuccess(value);
-}
-
-async function readRequiredRole(
+async function askRequiredRole(
   rl: CliInterface,
   prompt: string,
   invalidMessage: string
-): Promise<Rol | undefined> {
+): Promise<Rol | null> {
   const role = parseRequiredRole(await rl.question(prompt));
   if (!role) {
     console.log(invalidMessage);
-    return undefined;
   }
-
   return role;
 }
 
-async function readOptionalRole(
+async function askOptionalRole(
   rl: CliInterface,
   prompt: string,
   invalidMessage: string
@@ -188,7 +157,6 @@ async function readOptionalRole(
   if (role === null) {
     console.log(invalidMessage);
   }
-
   return role;
 }
 
@@ -199,29 +167,36 @@ async function confirmDeletion(rl: CliInterface, label: string): Promise<boolean
   return confirm === "s" || confirm === "si" || confirm === "sí";
 }
 
-async function withDeletionConfirmation(
+async function confirmAndRun(
   rl: CliInterface,
   label: string,
-  onConfirm: () => void | Promise<void>
+  action: () => void | Promise<void>
 ): Promise<void> {
   if (await confirmDeletion(rl, label)) {
-    await onConfirm();
+    await action();
     return;
   }
 
   console.log("ℹ️ Eliminación cancelada.");
 }
 
-async function withDeleteAction(
-  rl: CliInterface,
+function createDeleteAction(
   prompt: string,
-  invalidMessage: string,
   labelBuilder: (id: number) => string,
-  onConfirm: (id: number) => void | Promise<void>
-): Promise<void> {
-  await withRequiredNumber(rl, prompt, invalidMessage, async (id) => {
-    await withDeletionConfirmation(rl, labelBuilder(id), () => onConfirm(id));
-  });
+  onDelete: (id: number) => void | Promise<void>
+): MenuAction {
+  return async (rl) => {
+    const id = await askRequiredNumber(rl, prompt, INVALID_ID);
+    if (id === null) {
+      return;
+    }
+
+    await confirmAndRun(rl, labelBuilder(id), () => onDelete(id));
+  };
+}
+
+function printMenu(): void {
+  console.log(`\n${MENU_TEXT}`);
 }
 
 const menuActions: Record<string, MenuAction> = {
@@ -234,65 +209,62 @@ const menuActions: Record<string, MenuAction> = {
     categoryController.create(name, description);
   },
   "3": async (rl) => {
-    const id = await readRequiredNumber(rl, "ID de la categoría: ", "❌ ID inválido.");
-    if (id === undefined) {
+    const id = await askRequiredNumber(rl, "ID de la categoría: ", INVALID_ID);
+    if (id === null) {
       return;
     }
-
     categoryController.getById(id);
   },
   "4": async (rl) => {
-    const id = await readRequiredNumber(rl, "ID de la categoría a actualizar: ", "❌ ID inválido.");
-    if (id === undefined) {
+    const id = await askRequiredNumber(rl, "ID de la categoría a actualizar: ", INVALID_ID);
+    if (id === null) {
       return;
     }
 
     const name = (await rl.question("Nuevo nombre (enter para omitir): ")).trim();
     const description = (await rl.question("Nueva descripción (enter para omitir): ")).trim();
-
     categoryController.update(id, {
       name: name || undefined,
       description: description || undefined
     });
   },
-  "5": async (rl) => {
-    const id = await readRequiredNumber(rl, "ID de la categoría a eliminar: ", "❌ ID inválido.");
-    if (id === undefined) {
-      return;
-    }
+  "5": createDeleteAction(
+    "ID de la categoría a eliminar: ",
+    (id) => `la categoría ${id}`,
+    (id) => categoryController.remove(id)
+  ),
 
-    await withDeletionConfirmation(rl, `la categoría ${id}`, () => categoryController.remove(id));
-  },
   "6": async () => {
     seriesController.list();
   },
   "7": async (rl) => {
     const title = await rl.question("Título de la serie: ");
-    const categoryId = await readRequiredNumber(rl, "ID de la categoría: ", "❌ ID de categoría inválido.");
-    if (categoryId === undefined) {
+    const categoryId = await askRequiredNumber(rl, "ID de la categoría: ", "❌ ID de categoría inválido.");
+    if (categoryId === null) {
       return;
     }
-
     seriesController.create(title, categoryId);
   },
   "8": async (rl) => {
-    const id = await readRequiredNumber(rl, "ID de la serie: ", "❌ ID inválido.");
-    if (id === undefined) {
+    const id = await askRequiredNumber(rl, "ID de la serie: ", INVALID_ID);
+    if (id === null) {
       return;
     }
-
     seriesController.getById(id);
   },
   "9": async (rl) => {
-    const id = await readRequiredNumber(rl, "ID de la serie a actualizar: ", "❌ ID inválido.");
-    if (id === undefined) {
+    const id = await askRequiredNumber(rl, "ID de la serie a actualizar: ", INVALID_ID);
+    if (id === null) {
       return;
     }
 
     const title = (await rl.question("Nuevo título (enter para omitir): ")).trim();
-    const categoryId = await askOptionalNumber(rl, "Nuevo ID de categoría (enter para omitir): ");
+    const categoryId = await askOptionalNumber(
+      rl,
+      "Nuevo ID de categoría (enter para omitir): ",
+      "❌ ID de categoría inválido."
+    );
     if (categoryId === null) {
-      console.log("❌ ID de categoría inválido.");
       return;
     }
 
@@ -301,29 +273,26 @@ const menuActions: Record<string, MenuAction> = {
       categoryId
     });
   },
-  "10": async (rl) => {
-    const id = await readRequiredNumber(rl, "ID de la serie a eliminar: ", "❌ ID inválido.");
-    if (id === undefined) {
-      return;
-    }
-
-    await withDeletionConfirmation(rl, `la serie ${id}`, () => seriesController.remove(id));
-  },
+  "10": createDeleteAction(
+    "ID de la serie a eliminar: ",
+    (id) => `la serie ${id}`,
+    (id) => seriesController.remove(id)
+  ),
   "11": async (rl) => {
-    const categoryId = await readRequiredNumber(rl, "ID de la categoría a filtrar: ", "❌ ID inválido.");
-    if (categoryId === undefined) {
+    const categoryId = await askRequiredNumber(rl, "ID de la categoría a filtrar: ", INVALID_ID);
+    if (categoryId === null) {
       return;
     }
-
     seriesController.listByCategory(categoryId);
   },
+
   "12": async () => {
     seasonEpisodeController.listSeasons();
   },
   "13": async (rl) => {
-    const seriesId = await readRequiredNumber(rl, "ID de la serie: ", "❌ IDs o número inválidos.");
-    const number = await readRequiredNumber(rl, "Número de temporada: ", "❌ IDs o número inválidos.");
-    if (seriesId === undefined || number === undefined) {
+    const seriesId = await askRequiredNumber(rl, "ID de la serie: ", INVALID_NUMERIC_DATA);
+    const number = await askRequiredNumber(rl, "Número de temporada: ", INVALID_NUMERIC_DATA);
+    if (seriesId === null || number === null) {
       return;
     }
 
@@ -331,14 +300,13 @@ const menuActions: Record<string, MenuAction> = {
     seasonEpisodeController.createSeason(seriesId, number, title);
   },
   "14": async (rl) => {
-    const id = await readRequiredNumber(rl, "ID de la temporada a actualizar: ", "❌ ID inválido.");
-    if (id === undefined) {
+    const id = await askRequiredNumber(rl, "ID de la temporada a actualizar: ", INVALID_ID);
+    if (id === null) {
       return;
     }
 
-    const number = await askOptionalNumber(rl, "Nuevo número (enter para omitir): ");
+    const number = await askOptionalNumber(rl, "Nuevo número (enter para omitir): ", "❌ Número inválido.");
     if (number === null) {
-      console.log("❌ Número inválido.");
       return;
     }
 
@@ -348,29 +316,23 @@ const menuActions: Record<string, MenuAction> = {
       title: title || undefined
     });
   },
-  "15": async (rl) => {
-    const id = await readRequiredNumber(rl, "ID de la temporada a eliminar: ", "❌ ID inválido.");
-    if (id === undefined) {
-      return;
-    }
-
-    await withDeletionConfirmation(rl, `la temporada ${id}`, () =>
-      seasonEpisodeController.removeSeason(id)
-    );
-  },
+  "15": createDeleteAction(
+    "ID de la temporada a eliminar: ",
+    (id) => `la temporada ${id}`,
+    (id) => seasonEpisodeController.removeSeason(id)
+  ),
   "16": async (rl) => {
-    const seasonId = await readRequiredNumber(rl, "ID de la temporada: ", "❌ ID inválido.");
-    if (seasonId === undefined) {
+    const seasonId = await askRequiredNumber(rl, "ID de la temporada: ", INVALID_ID);
+    if (seasonId === null) {
       return;
     }
-
     seasonEpisodeController.listEpisodesBySeason(seasonId);
   },
   "17": async (rl) => {
-    const seasonId = await readRequiredNumber(rl, "ID de la temporada: ", "❌ Datos numéricos inválidos.");
-    const number = await readRequiredNumber(rl, "Número de episodio: ", "❌ Datos numéricos inválidos.");
-    const durationMin = await readRequiredNumber(rl, "Duración (minutos): ", "❌ Datos numéricos inválidos.");
-    if (seasonId === undefined || number === undefined || durationMin === undefined) {
+    const seasonId = await askRequiredNumber(rl, "ID de la temporada: ", INVALID_NUMERIC_DATA);
+    const number = await askRequiredNumber(rl, "Número de episodio: ", INVALID_NUMERIC_DATA);
+    const durationMin = await askRequiredNumber(rl, "Duración (minutos): ", INVALID_NUMERIC_DATA);
+    if (seasonId === null || number === null || durationMin === null) {
       return;
     }
 
@@ -378,15 +340,22 @@ const menuActions: Record<string, MenuAction> = {
     seasonEpisodeController.createEpisode(seasonId, number, title, durationMin);
   },
   "18": async (rl) => {
-    const id = await readRequiredNumber(rl, "ID del episodio a actualizar: ", "❌ ID inválido.");
-    if (id === undefined) {
+    const id = await askRequiredNumber(rl, "ID del episodio a actualizar: ", INVALID_ID);
+    if (id === null) {
       return;
     }
 
-    const number = await askOptionalNumber(rl, "Nuevo número (enter para omitir): ");
-    const durationMin = await askOptionalNumber(rl, "Nueva duración en minutos (enter para omitir): ");
+    const number = await askOptionalNumber(
+      rl,
+      "Nuevo número (enter para omitir): ",
+      "❌ Número o duración inválidos."
+    );
+    const durationMin = await askOptionalNumber(
+      rl,
+      "Nueva duración en minutos (enter para omitir): ",
+      "❌ Número o duración inválidos."
+    );
     if (number === null || durationMin === null) {
-      console.log("❌ Número o duración inválidos.");
       return;
     }
 
@@ -397,19 +366,15 @@ const menuActions: Record<string, MenuAction> = {
       durationMin
     });
   },
-  "19": async (rl) => {
-    const id = await readRequiredNumber(rl, "ID del episodio a eliminar: ", "❌ ID inválido.");
-    if (id === undefined) {
-      return;
-    }
-
-    await withDeletionConfirmation(rl, `el episodio ${id}`, () =>
-      seasonEpisodeController.removeEpisode(id)
-    );
-  },
+  "19": createDeleteAction(
+    "ID del episodio a eliminar: ",
+    (id) => `el episodio ${id}`,
+    (id) => seasonEpisodeController.removeEpisode(id)
+  ),
   "20": async () => {
     seasonEpisodeController.listAllEpisodes();
   },
+
   "21": async () => {
     await userController.listActive(adminUser);
   },
@@ -417,46 +382,41 @@ const menuActions: Record<string, MenuAction> = {
     const nombre = await rl.question("Nombre: ");
     const email = await rl.question("Email: ");
     const password = await rl.question("Contraseña: ");
-    const role = await readRequiredRole(rl, "Rol (ADMIN/USER): ", "❌ Rol inválido. Debe ser ADMIN o USER.");
-    if (!role) {
+    const rol = await askRequiredRole(rl, "Rol (ADMIN/USER): ", INVALID_ROLE);
+    if (!rol) {
       return;
     }
 
-    await userController.create(adminUser, { nombre, email, password, rol: role });
+    await userController.create(adminUser, { nombre, email, password, rol });
   },
   "23": async (rl) => {
-    const id = await readRequiredNumber(rl, "ID de usuario a actualizar: ", "❌ ID inválido.");
-    if (id === undefined) {
+    const id = await askRequiredNumber(rl, "ID de usuario a actualizar: ", INVALID_ID);
+    if (id === null) {
       return;
     }
 
     const nombre = (await rl.question("Nuevo nombre (enter para omitir): ")).trim();
     const email = (await rl.question("Nuevo email (enter para omitir): ")).trim();
-    const role = await readOptionalRole(
+    const rol = await askOptionalRole(
       rl,
       "Nuevo rol ADMIN/USER (enter para omitir): ",
-      "❌ Rol inválido. Debe ser ADMIN o USER."
+      INVALID_ROLE
     );
-    if (role === null) {
+    if (rol === null) {
       return;
     }
 
     await userController.update(adminUser, id, {
       nombre: nombre || undefined,
       email: email || undefined,
-      rol: role
+      rol
     });
   },
-  "24": async (rl) => {
-    const id = await readRequiredNumber(rl, "ID de usuario a eliminar: ", "❌ ID inválido.");
-    if (id === undefined) {
-      return;
-    }
-
-    await withDeletionConfirmation(rl, `el usuario ${id}`, () =>
-      userController.remove(adminUser, id)
-    );
-  }
+  "24": createDeleteAction(
+    "ID de usuario a eliminar: ",
+    (id) => `el usuario ${id}`,
+    (id) => userController.remove(adminUser, id)
+  )
 };
 
 async function bootstrapCli(): Promise<void> {
