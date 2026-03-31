@@ -1,7 +1,3 @@
-/**
- * Concrete repository implementations (in-memory, JSON, etc.).
- *
- * Rule: implement domain contracts here.
- */
-
-export {};
+export { InMemoryCategoryRepository } from "./InMemoryCategoryRepository";
+export { InMemorySeasonRepository } from "./InMemorySeasonRepository";
+export { InMemoryEpisodeRepository } from "./InMemoryEpisodeRepository";

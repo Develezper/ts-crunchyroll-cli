@@ -1,7 +1,3 @@
-/**
- * Domain contracts (repository/service interfaces).
- *
- * Rule: declare contracts that infrastructure implementations must satisfy.
- */
-
-export {};
+export type { CategoryRepository } from "./CategoryRepository";
+export type { SeasonRepository } from "./SeasonRepository";
+export type { EpisodeRepository } from "./EpisodeRepository";
