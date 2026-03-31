@@ -5,8 +5,8 @@ export function esAdmin(user: User): boolean {
 }
 
 /**
- * Simula un middleware de Node validando que el usuario tenga rol ADMIN.
- * Lanza un error en caso de no tener permisos.
+ * Simulates a Node-style middleware check for ADMIN role.
+ * Throws an error when the user does not have permission.
  */
 export function validarAdmin(user: User | null | undefined): void {
     if (!user || user.rol !== "ADMIN") {
@@ -15,7 +15,7 @@ export function validarAdmin(user: User | null | undefined): void {
 }
 
 /**
- * Ejecuta una accion solo si el usuario es ADMIN
+ * Executes an action only when the user has ADMIN role.
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function requireAdmin(user: User, action: Function): any {
