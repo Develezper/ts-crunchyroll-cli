@@ -28,16 +28,6 @@ export interface IUserRepository {
     update(id: number, data: Partial<UserProps>): Promise<User | null>;
 
     /**
-     * Adds a series ID to the user's favorites.
-     */
-    addFavorite(userId: number, seriesId: number): Promise<void>;
-
-    /**
-     * Adds a series ID to the user's watch history.
-     */
-    addToHistory(userId: number, seriesId: number): Promise<void>;
-
-    /**
      * Soft deletes a user (active = false).
      */
     softDelete(id: number): Promise<boolean>;

@@ -28,10 +28,6 @@ export class UserController {
     }
   }
 
-  showProfile(currentUser: User): void {
-    UserView.showItem(currentUser);
-  }
-
   async update(
     currentUser: User,
     id: number,
@@ -60,24 +56,6 @@ export class UserController {
       }
 
       CommonView.showSuccess(`Usuario ${id} eliminado correctamente (borrado lógico).`);
-    } catch (error) {
-      CommonView.showError(error);
-    }
-  }
-
-  async addFavorite(userId: number, seriesId: number): Promise<void> {
-    try {
-      await this.userService.addFavorite(userId, seriesId);
-      CommonView.showSuccess("Serie agregada a favoritos.");
-    } catch (error) {
-      CommonView.showError(error);
-    }
-  }
-
-  async addHistory(userId: number, seriesId: number): Promise<void> {
-    try {
-      await this.userService.watchSeries(userId, seriesId);
-      CommonView.showSuccess("Serie agregada al historial de visualización.");
     } catch (error) {
       CommonView.showError(error);
     }

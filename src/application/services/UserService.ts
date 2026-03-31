@@ -61,14 +61,4 @@ export class UserService {
         }
         return this.userRepository.softDelete(id);
     }
-
-    @LogExecution()
-    async addFavorite(userId: number, seriesId: number): Promise<void> {
-        await this.userRepository.addFavorite(userId, seriesId);
-    }
-
-    @LogExecution()
-    async watchSeries(userId: number, seriesId: number): Promise<void> {
-        await this.userRepository.addToHistory(userId, seriesId);
-    }
 }

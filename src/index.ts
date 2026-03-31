@@ -106,11 +106,8 @@ function printMenu(): void {
   console.log("20. Listar todos los episodios");
   console.log("21. Listar usuarios activos");
   console.log("22. Crear usuario");
-  console.log("23. Ver perfil admin actual");
-  console.log("24. Actualizar usuario");
-  console.log("25. Eliminar usuario (borrado lógico)");
-  console.log("26. Agregar serie a favoritos de usuario");
-  console.log("27. Agregar serie al historial de usuario");
+  console.log("23. Actualizar usuario");
+  console.log("24. Eliminar usuario (borrado lógico)");
   console.log("0. Salir");
 }
 
@@ -357,9 +354,7 @@ async function bootstrapCli(): Promise<void> {
         break;
       }
       case "23":
-        userController.showProfile(adminUser);
-        break;
-      case "24": {
+      {
         const id = await askNumber(rl, "ID de usuario a actualizar: ");
         if (id === null) {
           console.log("❌ ID inválido.");
@@ -378,7 +373,7 @@ async function bootstrapCli(): Promise<void> {
         });
         break;
       }
-      case "25": {
+      case "24": {
         const id = await askNumber(rl, "ID de usuario a eliminar: ");
         if (id === null) {
           console.log("❌ ID inválido.");
@@ -389,26 +384,6 @@ async function bootstrapCli(): Promise<void> {
         } else {
           console.log("ℹ️ Eliminación cancelada.");
         }
-        break;
-      }
-      case "26": {
-        const userId = await askNumber(rl, "ID de usuario: ");
-        const seriesId = await askNumber(rl, "ID de serie: ");
-        if (userId === null || seriesId === null) {
-          console.log("❌ IDs inválidos.");
-          break;
-        }
-        await userController.addFavorite(userId, seriesId);
-        break;
-      }
-      case "27": {
-        const userId = await askNumber(rl, "ID de usuario: ");
-        const seriesId = await askNumber(rl, "ID de serie: ");
-        if (userId === null || seriesId === null) {
-          console.log("❌ IDs inválidos.");
-          break;
-        }
-        await userController.addHistory(userId, seriesId);
         break;
       }
 

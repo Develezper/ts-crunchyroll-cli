@@ -3,7 +3,6 @@ import { User } from "../../domain/entities/User";
 import type { IUserRepository } from "../../domain/interfaces/UserRepository";
 import { usersData } from "../../data";
 import { generarId } from "../../shared/utils/generateId";
-import { NotFoundError } from "../../shared/errors/NotFoundError"; // Assumption that this exists or we will create it
 
 export class InMemoryUserRepository implements IUserRepository {
     private users: User[] = usersData;
@@ -48,22 +47,6 @@ export class InMemoryUserRepository implements IUserRepository {
 
         Object.assign(user, data);
         return user;
-    }
-
-    async addFavorite(userId: number, seriesId: number): Promise<void> {
-        const user = await this.findById(userId);
-        if (!user) throw new NotFoundError("Usuario no encontrado");
-
-        if (!user.favoritos.includes(seriesId)) {
-            user.favoritos.push(seriesId);
-        }
-    }
-
-    async addToHistory(userId: number, seriesId: number): Promise<void> {
-        const user = await this.findById(userId);
-        if (!user) throw new NotFoundError("Usuario no encontrado");
-
-        user.historial.push(seriesId);
     }
 
     async softDelete(id: number): Promise<boolean> {
