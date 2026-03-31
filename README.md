@@ -1,8 +1,12 @@
 # ts-crunchyroll-cli
 
-Console CRUD project in TypeScript, structured with Clean Architecture principles.
+Proyecto CRUD por consola en TypeScript inspirado en Crunchyroll, organizado con arquitectura por capas (estilo Clean Architecture).
 
-## Current Architecture
+## Objetivo
+
+Construir una aplicación mantenible, tipada y explicable en sustentación, separando claramente dominio, servicios, persistencia y presentación.
+
+## Arquitectura actual
 
 ```txt
 src/
@@ -10,74 +14,41 @@ src/
 ├── data.ts
 ├── domain/
 │   ├── entities/
-│   │   ├── Category.ts
-│   │   ├── Episode.ts
-│   │   ├── Season.ts
-│   │   ├── Series.ts
-│   │   ├── User.ts
-│   │   └── index.ts
 │   └── interfaces/
-│       ├── CategoryRepository.ts
-│       ├── EpisodeRepository.ts
-│       ├── SeasonRepository.ts
-│       ├── SeriesRepository.ts
-│       ├── UserRepository.ts
-│       └── index.ts
 ├── application/
 │   └── services/
-│       ├── CategoryService.ts
-│       ├── EpisodeService.ts
-│       ├── SeasonService.ts
-│       ├── UserService.ts
-│       └── index.ts
 ├── infrastructure/
 │   ├── database/
-│   │   ├── inMemoryDb.ts
-│   │   └── index.ts
 │   └── repositories/
-│       ├── InMemoryCategoryRepository.ts
-│       ├── InMemoryEpisodeRepository.ts
-│       ├── InMemorySeasonRepository.ts
-│       ├── InMemoryUserRepository.ts
-│       ├── JsonUserRepository.ts
-│       └── index.ts
 ├── presentation/
 │   ├── controllers/
-│   │   ├── CategoryController.ts
-│   │   ├── SeasonEpisodeController.ts
-│   │   ├── UserController.ts
-│   │   └── index.ts
 │   └── views/
-│       ├── CategoryView.ts
-│       ├── CommonView.ts
-│       ├── SeasonEpisodeView.ts
-│       ├── UserView.ts
-│       └── index.ts
 └── shared/
     ├── decorators/
-    │   ├── LogExecution.ts
-    │   └── index.ts
     ├── errors/
-    │   ├── ValidationError.ts
-    │   ├── NotFoundError.ts
-    │   └── index.ts
     └── utils/
-        ├── auth.ts
-        ├── generateId.ts
-        └── index.ts
 ```
 
-## Current Status
+## Estado actual
 
-- Implemented: `users`, `categories`, `seasons`, `episodes` (with services, repos, controllers, and views).
-- Pending: complete `series` service/repository/controller/view and integrate a full interactive CRUD menu in `index.ts`.
+Implementado:
 
-## Language Rule
+- users
+- categories
+- seasons
+- episodes
 
-- User-facing CLI output must be in Spanish.
-- Code and file names can stay in English.
+Pendiente principal:
 
-## Commands
+- completar flujo completo de series (`service`, `repository`, `controller`, `view`)
+- consolidar menú interactivo CRUD en `src/index.ts`
+
+## Regla de idioma
+
+- Código y nombres técnicos: inglés.
+- Mensajes al usuario por consola: español.
+
+## Comandos rápidos
 
 ```bash
 bun run src/index.ts
@@ -87,8 +58,7 @@ bun run src/index.ts
 npx tsc --noEmit
 ```
 
-## Team Guide
+## Documentación del equipo
 
-Project planning, ownership, and per-file responsibilities:
-
-- `TEAM_GUIDE_CRUD_CRUNCHYROLL.md`
+- Guía operativa completa: `TEAM_GUIDE_CRUD_CRUNCHYROLL.md`
+- Resumen de arranque rápido: `GUIA.md`
