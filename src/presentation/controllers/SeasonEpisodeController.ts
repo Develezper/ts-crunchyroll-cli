@@ -67,6 +67,14 @@ export class SeasonEpisodeController {
     }
   }
 
+  listAllEpisodes(): void {
+    try {
+      SeasonEpisodeView.showEpisodes(this.episodeService.findAll());
+    } catch (error) {
+      CommonView.showError(error);
+    }
+  }
+
   updateEpisode(
     id: number,
     data: { number?: number; title?: string; durationMin?: number }

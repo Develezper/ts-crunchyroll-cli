@@ -25,6 +25,16 @@ function parseNumber(value: string): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+async function confirmDeletion(
+  rl: ReturnType<typeof createInterface>,
+  label: string
+): Promise<boolean> {
+  const confirm = (await rl.question(`¿Seguro que deseas eliminar ${label}? (s/n): `))
+    .trim()
+    .toLowerCase();
+  return confirm === "s" || confirm === "si" || confirm === "sí";
+}
+
 async function bootstrapCli(): Promise<void> {
   // Composition root already built above; this loop only orchestrates CLI interaction.
   const rl = createInterface({ input, output });
@@ -46,6 +56,7 @@ async function bootstrapCli(): Promise<void> {
     console.log("11. Crear episodio");
     console.log("12. Actualizar episodio");
     console.log("13. Eliminar episodio");
+    console.log("14. Listar todos los episodios");
     console.log("0. Salir");
 
     const option = (await rl.question("\nSelecciona una opción: ")).trim();
@@ -99,6 +110,10 @@ async function bootstrapCli(): Promise<void> {
         console.log("❌ ID inválido.");
         continue;
       }
+      if (!(await confirmDeletion(rl, `la categoría ${id}`))) {
+        console.log("ℹ️ Eliminación cancelada.");
+        continue;
+      }
       categoryController.remove(id);
       continue;
     }
@@ -145,6 +160,10 @@ async function bootstrapCli(): Promise<void> {
       const id = parseNumber(await rl.question("ID de la temporada a eliminar: "));
       if (id === null) {
         console.log("❌ ID inválido.");
+        continue;
+      }
+      if (!(await confirmDeletion(rl, `la temporada ${id}`))) {
+        console.log("ℹ️ Eliminación cancelada.");
         continue;
       }
       seasonEpisodeController.removeSeason(id);
@@ -205,7 +224,16 @@ async function bootstrapCli(): Promise<void> {
         console.log("❌ ID inválido.");
         continue;
       }
+      if (!(await confirmDeletion(rl, `el episodio ${id}`))) {
+        console.log("ℹ️ Eliminación cancelada.");
+        continue;
+      }
       seasonEpisodeController.removeEpisode(id);
+      continue;
+    }
+
+    if (option === "14") {
+      seasonEpisodeController.listAllEpisodes();
       continue;
     }
 
