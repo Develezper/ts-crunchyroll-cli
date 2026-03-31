@@ -1,5 +1,5 @@
 import { User } from "./domain/entities/User";
-import { setGenerarId } from "./shared/utils/generateId";
+import { setGenerarId } from "./shared/utils";
 
 export const usersData: User[] = [
   new User({

@@ -2,7 +2,7 @@ import type { UserProps } from "../../domain/entities/User";
 import { User } from "../../domain/entities/User";
 import type { IUserRepository } from "../../domain/interfaces/UserRepository";
 import { NotFoundError, ValidationError } from "../../shared/errors";
-import { validarAdmin } from "../../shared/utils/auth";
+import { validarAdmin } from "../../shared/utils";
 import { LogExecution } from "../../shared/decorators/LogExecution";
 
 type CreateUserInput = Omit<

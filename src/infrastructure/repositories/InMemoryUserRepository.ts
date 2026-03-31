@@ -2,7 +2,7 @@ import type { UserProps } from "../../domain/entities/User";
 import { User } from "../../domain/entities/User";
 import type { IUserRepository } from "../../domain/interfaces/UserRepository";
 import { usersData } from "../../data";
-import { generarId } from "../../shared/utils/generateId";
+import { generarId } from "../../shared/utils";
 
 export class InMemoryUserRepository implements IUserRepository {
   private users: User[] = usersData;
