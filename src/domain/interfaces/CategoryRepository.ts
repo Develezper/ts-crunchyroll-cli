@@ -1,10 +1,11 @@
-import { Category } from "../entities/Category";
+// We use "import type" because CategoryRepository is an interface
+import type { Category } from '../entities/Category';
 
+// This interface defines the actions we can do with Categories in the database
 export interface CategoryRepository {
-  create(category: Category): Category;
+  save(category: Category): void;
+  findById(id: string): Category | null;
   findAll(): Category[];
-  findById(id: number): Category | undefined;
-  update(id: number, data: Partial<Omit<Category, "id">>): Category | undefined;
-  delete(id: number): boolean;
-  existsByName(name: string): boolean;
+  update(id: string, category: Partial<Category>): void;
+  delete(id: string): void;
 }
