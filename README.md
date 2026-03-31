@@ -95,3 +95,9 @@ npx tsc --noEmit
 ## Note
 
 This scaffold is intentionally minimal: the goal is to guide the team with a clear structure before implementing the final logic.
+
+## Team Guide
+
+For planning, roles, delivery flow, and presentation support, check:
+
+- `TEAM_GUIDE_CRUD_CRUNCHYROLL.md`
