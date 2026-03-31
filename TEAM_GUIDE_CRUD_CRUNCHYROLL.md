@@ -146,18 +146,18 @@ Definition of Done:
 
 - Equipo listo para exponer sin improvisar.
 
-## 9. Roles sugeridos del equipo
+## 9. Roles sugeridos del equipo (3 personas)
 
 | Rol | Responsabilidad principal | Entregable |
 |---|---|---|
-| Arquitecto / TL | Define estructura, contratos y estandares | Mapa tecnico + decisiones |
-| Domain Dev | Entidades y tipos del dominio | Clases + DTOs tipados |
-| Infrastructure Dev | Repositorios in-memory y datos seed | Repos funcionales |
-| Application Dev | Casos de uso y reglas de negocio | CRUD + validaciones |
-| CLI Dev | Controladores y vistas de consola | Flujo de menu en espanol |
-| QA/Doc Dev | Pruebas manuales, checklist y docs | Evidencia de pruebas + guion |
+| Dev 1 - Arquitectura + Dominio | Estructura, entidades, contratos, estandares | Entidades y contratos listos + reglas de arquitectura |
+| Dev 2 - Aplicacion + Infraestructura | Servicios CRUD, validaciones, repositorios in-memory, seeds | Casos de uso funcionando + persistencia en memoria |
+| Dev 3 - CLI + QA/Docs | Controladores, vistas, mensajes en espanol, pruebas manuales y documentacion | Flujo completo por consola + checklist + guion de demo |
 
-Si el equipo es pequeno, se pueden combinar roles, pero no mezclar responsabilidades en el mismo archivo sin revisiones.
+Regla de trabajo:
+
+- Cada dev es owner de su capa principal.
+- Si un cambio cruza capas, se coordina por PR/revision antes de merge.
 
 ## 10. Reglas de calidad del codigo
 
@@ -297,28 +297,31 @@ Responsabilidad: errores de dominio/aplicacion.
 - `src/shared/utils/generateId.ts`
 Responsabilidad: helper para IDs y utilidades puras.
 
-## 16. Distribucion de trabajo por rol (archivos concretos)
+## 16. Distribucion de trabajo por rol (equipo de 3)
 
-- Arquitecto / TL
-Archivos foco: `src/services.ts`, `src/moduls.ts`, `README.md`, esta guia.
-Tarea: definir contratos, naming y reglas de calidad.
+- Dev 1 - Arquitectura + Dominio
+Archivos foco: `src/moduls.ts`, `src/services.ts`, `src/domain/entities/*`, `src/domain/interfaces/*`.
+Tarea: contratos, entidades, convenciones de naming y coherencia de capas.
 
-- Domain Dev
-Archivos foco: `src/domain/entities/*`, `src/domain/interfaces/*`.
-Tarea: clases y contratos limpios, sin dependencias externas.
+- Dev 2 - Aplicacion + Infraestructura
+Archivos foco: `src/application/services/*`, `src/infrastructure/repositories/*`, `src/data.ts`, `src/shared/errors/*`, `src/shared/decorators/*`, `src/shared/utils/*`.
+Tarea: implementar CRUD, validaciones, decorador obligatorio y repositorios in-memory.
 
-- Infrastructure Dev
-Archivos foco: `src/data.ts`, `src/infrastructure/repositories/*`.
-Tarea: repositorios in-memory y carga de datos semilla.
+- Dev 3 - CLI + QA/Docs
+Archivos foco: `src/presentation/controllers/*`, `src/presentation/views/*`, `src/index.ts`, `README.md`, esta guia.
+Tarea: menu/flujo de consola en espanol, pruebas manuales end-to-end y documentacion final.
 
-- Application Dev
-Archivos foco: `src/application/services/*`, `src/shared/errors/*`.
-Tarea: CRUD + validaciones + manejo de errores.
+## 17. Mini cronograma sugerido (3 personas)
 
-- CLI Dev
-Archivos foco: `src/presentation/controllers/*`, `src/presentation/views/*`, `src/index.ts`.
-Tarea: flujo por consola y mensajes en espanol.
+- Dia 1
+Dev 1: entidades + interfaces.
+Dev 2: repositorios + seeds.
+Dev 3: estructura de menu y vistas base.
 
-- QA/Doc Dev
-Archivos foco: `README.md`, esta guia, evidencia de pruebas.
-Tarea: checklist final, casos de prueba manuales y guion de demo.
+- Dia 2
+Dev 1: revision de arquitectura e integracion de contratos.
+Dev 2: CRUD completo + validaciones + decorador.
+Dev 3: conectar controladores con servicios y pruebas manuales.
+
+- Dia 3
+Todos: hardening final, demo de sustentacion y cierre de documentacion.
