@@ -1,71 +1,71 @@
-# Team Guide - CRUD Crunchyroll CLI (TypeScript)
+# Guía de Equipo - CRUD Crunchyroll CLI (TypeScript)
 
-This document is the single source of truth for the team.
-If there is any doubt about what to build, where to build it, or who owns it, this guide decides it.
-
----
-
-## 1. Project Vision
-
-Build a console CRUD app inspired by Crunchyroll with:
-
-- clean structure by layers
-- strict typing in TypeScript
-- clear separation of responsibilities
-- at least one decorator in use
-- user-facing console messages in Spanish
-
-This is not only about "making it work".
-It must be understandable, explainable, and defendable in the final presentation.
+Este documento es la fuente oficial de verdad del equipo.
+Si hay dudas sobre qué construir, dónde construirlo o quién es responsable, esta guía manda.
 
 ---
 
-## 2. Scope
+## 1. Visión del Proyecto
 
-### In scope
+Construir una app CRUD por consola inspirada en Crunchyroll con:
 
-- Users module
-- Categories module
-- Series module
-- Seasons and Episodes module
-- Shared utilities, errors, decorator
-- Console output and interaction flow
+- estructura limpia por capas
+- tipado estricto en TypeScript
+- separación clara de responsabilidades
+- al menos un decorador en uso
+- mensajes de consola para usuario final en español
 
-### Out of scope (unless there is extra time)
-
-- Real DB integration (PostgreSQL, MySQL, etc.)
-- HTTP API server
-- Authentication with tokens
-- Full automated test suite (manual tests are enough for delivery)
+No se trata solo de que "funcione".
+Debe ser entendible, explicable y defendible en la sustentación.
 
 ---
 
-## 3. Architecture Rules
+## 2. Alcance
 
-We use a Clean Architecture style:
+### Incluye
 
-- `domain`: entities and contracts (no framework/no IO)
-- `application`: business rules and use cases
-- `infrastructure`: persistence implementations
-- `presentation`: controllers and views for CLI
-- `shared`: cross-cutting concerns (errors, decorators, utils)
+- Módulo de usuarios
+- Módulo de categorías
+- Módulo de series
+- Módulo de temporadas y episodios
+- Utilidades compartidas, errores y decorador
+- Flujo de interacción por consola
 
-### Dependency rule
+### No incluye (salvo tiempo extra)
 
-Allowed direction:
+- Integración con base de datos real (PostgreSQL, MySQL, etc.)
+- API HTTP
+- Autenticación con tokens
+- Suite completa de pruebas automatizadas (con pruebas manuales alcanza para entrega)
+
+---
+
+## 3. Reglas de Arquitectura
+
+Usamos un estilo de Clean Architecture:
+
+- `domain`: entidades y contratos (sin framework/sin IO)
+- `application`: reglas de negocio y casos de uso
+- `infrastructure`: implementaciones de persistencia
+- `presentation`: controladores y vistas para CLI
+- `shared`: preocupaciones transversales (errores, decoradores, utilidades)
+
+### Regla de dependencias
+
+Dirección permitida:
 
 - `presentation -> application -> domain`
 - `infrastructure -> domain`
-- `shared` can be used by all layers
+- `shared` puede ser usado por todas las capas
 
-Not allowed:
+No permitido:
 
-- `domain` importing `infrastructure` or `presentation`
-- `views` implementing business rules
+- `domain` importando `infrastructure` o `presentation`
+- `views` implementando reglas de negocio
 
 ---
 
-## 4. Current Real Structure (Repository)
+## 4. Estructura Real Actual (Repositorio)
 
 ```txt
 src/
@@ -132,31 +132,31 @@ src/
 
 ---
 
-## 5. Current Status
+## 5. Estado Actual
 
-### Implemented
+### Implementado
 
-- Users module (entity + interface + service + repo + controller + view)
-- Categories module (entity + interface + service + repo + controller + view)
-- Seasons/Episodes module (entity + interface + service + repo + controller + view)
-- Shared errors/decorator/utils
+- Módulo de usuarios (entidad + interfaz + servicio + repositorio + controlador + vista)
+- Módulo de categorías (entidad + interfaz + servicio + repositorio + controlador + vista)
+- Módulo de temporadas/episodios (entidad + interfaz + servicio + repositorio + controlador + vista)
+- Errores compartidos, decorador y utilidades
 
-### Pending to complete
+### Pendiente por completar
 
-- Full Series flow in all layers:
+- Flujo completo de series en todas las capas:
   - `SeriesService.ts`
   - `InMemorySeriesRepository.ts`
   - `SeriesController.ts`
   - `SeriesView.ts`
-- Full interactive CLI menu in `src/index.ts` (currently scripted demo)
+- Menú interactivo completo de CLI en `src/index.ts` (ahora hay demo script)
 
 ---
 
-## 6. Entity Model (Domain)
+## 6. Modelo de Entidades (Domain)
 
 ### User
 
-Core fields:
+Campos principales:
 
 - `id`
 - `nombre`
@@ -169,7 +169,7 @@ Core fields:
 
 ### Category
 
-Core fields:
+Campos principales:
 
 - `id`
 - `name`
@@ -177,16 +177,16 @@ Core fields:
 
 ### Series
 
-Core fields:
+Campos principales:
 
 - `id`
 - `title`
 - `categoryId`
-- `seasonIds[]` or equivalent relation
+- `seasonIds[]` o relación equivalente
 
 ### Season
 
-Core fields:
+Campos principales:
 
 - `id`
 - `seriesId`
@@ -196,7 +196,7 @@ Core fields:
 
 ### Episode
 
-Core fields:
+Campos principales:
 
 - `id`
 - `seasonId`
@@ -206,33 +206,33 @@ Core fields:
 
 ---
 
-## 7. CRUD Matrix
+## 7. Matriz CRUD
 
-| Module | Create | Read | Update | Delete | Status |
+| Módulo | Create | Read | Update | Delete | Estado |
 |---|---|---|---|---|---|
-| Users | Yes | Yes | Yes | Yes (soft/hard) | Implemented |
-| Categories | Yes | Yes | Yes | Yes | Implemented |
-| Seasons | Yes | Yes | Yes | Yes | Implemented |
-| Episodes | Yes | Yes | Yes | Yes | Implemented |
-| Series | Pending | Partial | Pending | Pending | To finish |
+| Users | Sí | Sí | Sí | Sí (soft/hard) | Implementado |
+| Categories | Sí | Sí | Sí | Sí | Implementado |
+| Seasons | Sí | Sí | Sí | Sí | Implementado |
+| Episodes | Sí | Sí | Sí | Sí | Implementado |
+| Series | Pendiente | Parcial | Pendiente | Pendiente | Por completar |
 
 ---
 
-## 8. Team Roles (3-dev setup)
+## 8. Roles del Equipo (3 devs)
 
 - Dev 1: Users
 - Dev 2: Series + Categories
 - Dev 3: Seasons + Episodes
 
-### Global rule
+### Regla global
 
-Each dev owns one domain module across layers, but integration files are shared.
+Cada dev es dueño de un dominio a través de las capas, pero los archivos de integración son compartidos.
 
 ---
 
-## 9. File Ownership - Dev 1 (Users)
+## 9. Ownership de Archivos - Dev 1 (Users)
 
-### Must own
+### Debe encargarse de
 
 - `src/domain/entities/User.ts`
 - `src/domain/interfaces/UserRepository.ts`
@@ -241,57 +241,57 @@ Each dev owns one domain module across layers, but integration files are shared.
 - `src/infrastructure/repositories/JsonUserRepository.ts`
 - `src/presentation/controllers/UserController.ts`
 - `src/presentation/views/UserView.ts`
-- `src/data.ts` (users section)
+- `src/data.ts` (sección users)
 - `data/users.json`
 
-### Must deliver
+### Debe entregar
 
-- Complete CRUD for users
-- Admin checks for privileged operations
-- Favorites/history flows
-- Spanish console messages
+- CRUD completo de usuarios
+- Validaciones de permisos admin
+- Flujo de favoritos/historial
+- Mensajes de consola en español
 
-### Done criteria
+### Criterio de terminado
 
-- `tsc` passes
-- login + create + list + update + delete works from CLI flow
+- `tsc` pasa
+- login + create + list + update + delete funcionando desde CLI
 
 ---
 
-## 10. File Ownership - Dev 2 (Series + Categories)
+## 10. Ownership de Archivos - Dev 2 (Series + Categories)
 
-### Must own
+### Debe encargarse de
 
 - `src/domain/entities/Series.ts`
 - `src/domain/entities/Category.ts`
 - `src/domain/interfaces/SeriesRepository.ts`
 - `src/domain/interfaces/CategoryRepository.ts`
-- `src/application/services/SeriesService.ts` (create this)
+- `src/application/services/SeriesService.ts` (crear)
 - `src/application/services/CategoryService.ts`
-- `src/infrastructure/repositories/InMemorySeriesRepository.ts` (create this)
+- `src/infrastructure/repositories/InMemorySeriesRepository.ts` (crear)
 - `src/infrastructure/repositories/InMemoryCategoryRepository.ts`
-- `src/presentation/controllers/SeriesController.ts` (create this)
+- `src/presentation/controllers/SeriesController.ts` (crear)
 - `src/presentation/controllers/CategoryController.ts`
-- `src/presentation/views/SeriesView.ts` (create this)
+- `src/presentation/views/SeriesView.ts` (crear)
 - `src/presentation/views/CategoryView.ts`
 
-### Must deliver
+### Debe entregar
 
-- Full CRUD for series
-- Category association validation
-- Category list/filter support for series
+- CRUD completo de series
+- Validación de relación serie-categoría
+- Listado/filtro por categoría en series
 
-### Done criteria
+### Criterio de terminado
 
-- Cannot create a series with invalid category
-- Series list and filter by category works
-- Update/delete paths are validated and handled
+- No se puede crear serie con categoría inválida
+- Funciona listado/filtro de series por categoría
+- Flujos de update/delete validados
 
 ---
 
-## 11. File Ownership - Dev 3 (Seasons + Episodes)
+## 11. Ownership de Archivos - Dev 3 (Seasons + Episodes)
 
-### Must own
+### Debe encargarse de
 
 - `src/domain/entities/Season.ts`
 - `src/domain/entities/Episode.ts`
@@ -304,100 +304,100 @@ Each dev owns one domain module across layers, but integration files are shared.
 - `src/presentation/controllers/SeasonEpisodeController.ts`
 - `src/presentation/views/SeasonEpisodeView.ts`
 
-### Must deliver
+### Debe entregar
 
-- Full CRUD for seasons and episodes
-- Relation checks (season belongs to series, episode belongs to season)
-- Input validation (`number > 0`, `durationMin > 0`)
+- CRUD completo de temporadas y episodios
+- Validaciones de relación (season->series, episode->season)
+- Validaciones de entrada (`number > 0`, `durationMin > 0`)
 
-### Done criteria
+### Criterio de terminado
 
-- Create/update/delete season works
-- Create/update/delete episode works
-- Query by `seriesId` and `seasonId` works
+- Create/update/delete de season funciona
+- Create/update/delete de episode funciona
+- Consultas por `seriesId` y `seasonId` funcionan
 
 ---
 
-## 12. Shared Integration Files (all 3 devs)
+## 12. Archivos Compartidos de Integración (los 3 devs)
 
-| File | Why shared |
+| Archivo | Motivo |
 |---|---|
-| `src/index.ts` | Composition root + application startup flow |
-| `src/application/services/index.ts` | Service exports |
-| `src/infrastructure/repositories/index.ts` | Repository exports |
-| `src/presentation/controllers/index.ts` | Controller exports |
-| `src/presentation/views/index.ts` | View exports |
-| `src/shared/decorators/LogExecution.ts` | Global method logging decorator |
-| `src/shared/errors/*` | Shared domain/application errors |
-| `src/shared/utils/*` | Shared helpers |
-| `README.md` | Public technical overview |
-| `TEAM_GUIDE_CRUD_CRUNCHYROLL.md` | Team operating guide |
+| `src/index.ts` | Composition root + arranque de la app |
+| `src/application/services/index.ts` | Export central de servicios |
+| `src/infrastructure/repositories/index.ts` | Export central de repositorios |
+| `src/presentation/controllers/index.ts` | Export central de controladores |
+| `src/presentation/views/index.ts` | Export central de vistas |
+| `src/shared/decorators/LogExecution.ts` | Decorador global de logs |
+| `src/shared/errors/*` | Errores reutilizables |
+| `src/shared/utils/*` | Helpers comunes |
+| `README.md` | Vista técnica pública |
+| `TEAM_GUIDE_CRUD_CRUNCHYROLL.md` | Guía operativa del equipo |
 
-### Shared rule
+### Regla compartida
 
-No one force-pushes or rewrites shared files without team sync.
-
----
-
-## 13. Coding Standards
-
-- Strict TypeScript (`no any`).
-- Keep names consistent in English for code identifiers.
-- Keep user-facing messages in Spanish.
-- Add comments only when they explain architecture or non-obvious logic.
-- Avoid dead code and duplicated logic.
+Nadie hace force-push ni reescribe archivos compartidos sin sincronización del equipo.
 
 ---
 
-## 14. Validation Standards
+## 13. Estándares de Código
 
-At minimum:
-
-- Required strings must be trimmed and non-empty.
-- IDs must be validated before mutation.
-- Duplicate constraints must be checked where required (for example category name).
-- Numeric domain values must be positive where applicable.
-
-Error strategy:
-
-- Use `ValidationError` for invalid input/business rule failures.
-- Use `NotFoundError` for missing entities.
+- TypeScript estricto (`no any`).
+- Nombres de identificadores en inglés consistentes.
+- Mensajes de consola para usuario final en español.
+- Comentar solo cuando explique arquitectura o lógica no obvia.
+- Evitar código muerto y duplicado.
 
 ---
 
-## 15. Decorator Requirement
+## 14. Estándares de Validación
 
-Use `LogExecution` on important service methods (create/update/remove/login).
+Como mínimo:
 
-Goal:
+- Strings obligatorios: `trim()` y no vacíos.
+- Validar IDs antes de mutar datos.
+- Validar duplicados cuando aplique (ejemplo: nombre de categoría).
+- Valores numéricos de dominio deben ser positivos donde aplique.
 
-- Show observable execution in console.
-- Demonstrate decorator usage in presentation.
+Estrategia de errores:
 
----
-
-## 16. CLI Output Policy
-
-- All final user messages in Spanish.
-- Success and error messages must be explicit.
-- Avoid dumping raw objects without formatting.
+- `ValidationError` para validaciones/reglas de negocio.
+- `NotFoundError` para entidades inexistentes.
 
 ---
 
-## 17. Implementation Flow (recommended order)
+## 15. Requisito de Decorador
 
-1. `domain` entities and contracts
-2. `infrastructure` repositories and seed data
-3. `application` services and validations
-4. `presentation` controllers and views
-5. `index.ts` composition and demo/menu flow
-6. `tsc` + manual tests
+Usar `LogExecution` en métodos importantes de servicio (create/update/remove/login).
+
+Objetivo:
+
+- Mostrar ejecución observable en consola.
+- Demostrar uso de decoradores en sustentación.
 
 ---
 
-## 18. Git Workflow
+## 16. Política de Salida CLI
 
-### Daily start
+- Todos los mensajes finales al usuario en español.
+- Mensajes de éxito y error claros.
+- No imprimir objetos crudos sin formato.
+
+---
+
+## 17. Flujo de Implementación (orden recomendado)
+
+1. entidades y contratos (`domain`)
+2. repositorios y seeds (`infrastructure`)
+3. servicios y validaciones (`application`)
+4. controladores y vistas (`presentation`)
+5. composición en `index.ts`
+6. `tsc` + pruebas manuales
+
+---
+
+## 18. Flujo Git
+
+### Inicio diario
 
 ```bash
 git fetch origin
@@ -407,100 +407,100 @@ git switch <tu-rama>
 git pull --ff-only origin <tu-rama>
 ```
 
-### Commit pattern
+### Patrón de commit
 
 ```bash
 git add -A
-git commit -m "feat: short clear description"
+git commit -m "feat: descripcion corta y clara"
 git push origin <tu-rama>
 ```
 
-### Before merge
+### Antes de merge
 
-- Run `npx tsc --noEmit`
-- Run local CLI demo
-- Review changed files against ownership
-
----
-
-## 19. Conflict Handling Protocol
-
-If conflict appears:
-
-1. Do not panic.
-2. Identify file owner based on this guide.
-3. Preserve current architecture layers.
-4. Resolve with owner present if shared file.
-5. Re-run `tsc` and smoke demo.
-
-Never do destructive commands (`reset --hard`) without team agreement.
+- Ejecutar `npx tsc --noEmit`
+- Ejecutar demo local en CLI
+- Revisar archivos cambiados contra ownership
 
 ---
 
-## 20. Manual Test Plan (minimum)
+## 19. Protocolo de Conflictos
+
+Si aparece conflicto:
+
+1. Mantener calma.
+2. Identificar dueño del archivo según esta guía.
+3. Preservar arquitectura por capas.
+4. Resolver con dueño presente si es archivo compartido.
+5. Re-ejecutar `tsc` + smoke demo.
+
+Nunca usar comandos destructivos (`reset --hard`) sin acuerdo del equipo.
+
+---
+
+## 20. Plan de Pruebas Manuales (mínimo)
 
 ### Categories
 
-- Create category with valid name
-- Reject empty category name
-- Reject duplicated category name
-- Update existing category
-- Delete existing category
+- Crear categoría válida
+- Rechazar nombre vacío
+- Rechazar nombre duplicado
+- Actualizar categoría existente
+- Eliminar categoría existente
 
 ### Seasons/Episodes
 
-- Create season with valid number/title
-- Reject season number <= 0
-- Create episode with valid duration
-- Reject episode duration <= 0
-- List episodes by season
+- Crear temporada válida
+- Rechazar temporada con número <= 0
+- Crear episodio válido
+- Rechazar episodio con duración <= 0
+- Listar episodios por temporada
 
 ### Users
 
-- Login success/failure
-- Admin-only operation guard
-- Add favorites/history
-- Soft delete behavior
+- Login exitoso/fallido
+- Verificación de operaciones solo admin
+- Agregar favoritos/historial
+- Verificar soft delete
 
 ### Global
 
-- No runtime crash in normal flow
-- Console output is understandable and in Spanish
+- Sin crash en flujo normal
+- Salida de consola clara y en español
 
 ---
 
-## 21. Presentation Script (for defense)
+## 21. Guion de Sustentación
 
-Suggested structure:
+Estructura sugerida:
 
-1. Explain architecture layers in 30-45 seconds.
-2. Show one complete CRUD flow live (recommended: categories).
-3. Show one cross-entity relation flow (recommended: season -> episodes).
-4. Show decorator log output from service calls.
-5. Mention strict typing and error strategy.
+1. Explicar capas en 30-45 segundos.
+2. Mostrar un CRUD completo en vivo (recomendado: categories).
+3. Mostrar una relación cruzada (recomendado: season -> episodes).
+4. Mostrar logs del decorador en ejecución.
+5. Cerrar con tipado estricto y estrategia de errores.
 
-Key sentence:
+Frase clave:
 
-"The project is organized with clean layer boundaries, where business rules live in services, persistence lives in repositories, and console interaction is isolated in presentation controllers/views."
+"El proyecto está organizado con límites claros por capas: las reglas de negocio viven en servicios, la persistencia en repositorios y la interacción de consola en controladores/vistas de presentación."
 
 ---
 
 ## 22. Definition of Done (final)
 
-Project is done only when all are true:
+El proyecto se considera terminado solo si se cumple todo:
 
-- Users CRUD works
-- Categories CRUD works
-- Series CRUD works
-- Seasons/Episodes CRUD works
-- At least one decorator is active in service methods
-- `npx tsc --noEmit` passes
-- Team guide and README are up to date
-- Demo flow is reproducible from `src/index.ts`
+- CRUD de users funciona
+- CRUD de categories funciona
+- CRUD de series funciona
+- CRUD de seasons/episodes funciona
+- Hay al menos un decorador activo en métodos de servicio
+- `npx tsc --noEmit` pasa
+- README y TEAM_GUIDE actualizados
+- Flujo de demo reproducible desde `src/index.ts`
 
 ---
 
-## 23. Quick Commands
+## 23. Comandos Rápidos
 
 ```bash
 bun run src/index.ts
@@ -512,8 +512,8 @@ npx tsc --noEmit
 
 ---
 
-## 24. Final Notes
+## 24. Notas Finales
 
-- If code and guide disagree, update the guide in the same PR.
-- Keep this document alive; it is part of the deliverable quality.
-- Prefer clarity over cleverness.
+- Si código y guía no coinciden, actualiza la guía en el mismo PR.
+- Esta guía es parte de la calidad del entregable.
+- Priorizar claridad sobre complejidad innecesaria.
