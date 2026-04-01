@@ -30,7 +30,7 @@ const INVALID_ID = "❌ ID inválido.";
 const INVALID_ROLE = "❌ Rol inválido. Debe ser ADMIN o USER.";
 const INVALID_NUMERIC_DATA = "❌ Datos numéricos inválidos.";
 
-const MENU_TEXT = `===== MENÚ PRINCIPAL =====
+const MENU_TEXT_COMMON = `===== MENÚ PRINCIPAL =====
 
 --- CATEGORÍAS ---
 1. Listar categorías
@@ -58,15 +58,19 @@ const MENU_TEXT = `===== MENÚ PRINCIPAL =====
 17. Crear episodio
 18. Actualizar episodio
 19. Eliminar episodio
-20. Listar todos los episodios
+20. Listar todos los episodios`;
 
---- USUARIOS ---
+// Role-specific menu blocks are appended to the shared menu text.
+const MENU_TEXT_ADMIN = `
+--- USUARIOS (SOLO ADMIN) ---
 21. Listar usuarios activos
 22. Crear usuario
 23. Actualizar usuario
-24. Eliminar usuario (borrado lógico)
+24. Eliminar usuario (borrado lógico)`;
 
-0. Salir`;
+const MENU_TEXT_USER = `
+--- USUARIOS (RESTRINGIDO) ---
+Solo ADMIN puede usar opciones 21 a 24.`;
 
 // Composition root.
 const categoryRepository = new InMemoryCategoryRepository();
@@ -97,6 +101,19 @@ function resolveAdminUser(): User {
 }
 
 const adminUser = resolveAdminUser();
+// Current session user selected at startup; drives role-based behavior in CLI.
+let sessionUser: User = adminUser;
+
+// Central role check used by menu rendering and admin-only actions.
+function isAdmin(user: User): boolean {
+  return user.rol === "ADMIN";
+}
+
+// Session selector only shows active users; falls back to seeded users if needed.
+function getSessionUsers(): User[] {
+  const activeUsers = usersData.filter((user) => user.activo);
+  return activeUsers.length > 0 ? activeUsers : usersData;
+}
 
 function parseNumber(value: string): number | null {
   const parsed = Number(value);
@@ -206,8 +223,35 @@ function createDeleteAction(
   };
 }
 
-function printMenu(): void {
-  console.log(`\n${MENU_TEXT}`);
+function printMenu(currentUser: User): void {
+  // Inject users section based on current role.
+  const userSection = isAdmin(currentUser) ? MENU_TEXT_ADMIN : MENU_TEXT_USER;
+  console.log(`\n${MENU_TEXT_COMMON}${userSection}\n\n0. Salir`);
+}
+
+async function selectSessionUser(rl: CliInterface): Promise<User> {
+  // Simple role selection (no password) to keep the demo flow fast.
+  const availableUsers = getSessionUsers();
+  console.log("\n👤 Selecciona el usuario para iniciar sesión:");
+  for (const [index, user] of availableUsers.entries()) {
+    console.log(`${index + 1}. ${user.nombre} (${user.rol}) - ${user.email}`);
+  }
+
+  while (true) {
+    const selection = Number((await rl.question("\nElige un número de usuario: ")).trim());
+    if (
+      Number.isInteger(selection) &&
+      selection >= 1 &&
+      selection <= availableUsers.length
+    ) {
+      const selectedUser = availableUsers[selection - 1];
+      if (selectedUser) {
+        return selectedUser;
+      }
+    }
+
+    console.log("❌ Selección inválida.");
+  }
 }
 
 const menuActions: Record<string, MenuAction> = {
@@ -386,10 +430,20 @@ const menuActions: Record<string, MenuAction> = {
     seasonEpisodeController.listAllEpisodes();
   },
 
+  // Admin-only user management options (21-24) are guarded at CLI level.
   "21": async () => {
-    await userController.listActive(adminUser);
+    if (!isAdmin(sessionUser)) {
+      console.log("❌ Esta opción es solo para usuarios ADMIN.");
+      return;
+    }
+    await userController.listActive(sessionUser);
   },
   "22": async (rl) => {
+    if (!isAdmin(sessionUser)) {
+      console.log("❌ Esta opción es solo para usuarios ADMIN.");
+      return;
+    }
+
     const nombre = await rl.question("Nombre: ");
     const email = await rl.question("Email: ");
     const password = await rl.question("Contraseña: ");
@@ -398,9 +452,14 @@ const menuActions: Record<string, MenuAction> = {
       return;
     }
 
-    await userController.create(adminUser, { nombre, email, password, rol });
+    await userController.create(sessionUser, { nombre, email, password, rol });
   },
   "23": async (rl) => {
+    if (!isAdmin(sessionUser)) {
+      console.log("❌ Esta opción es solo para usuarios ADMIN.");
+      return;
+    }
+
     const id = await askRequiredNumber(rl, "ID de usuario a actualizar: ", INVALID_ID);
     if (id === null) {
       return;
@@ -417,26 +476,36 @@ const menuActions: Record<string, MenuAction> = {
       return;
     }
 
-    await userController.update(adminUser, id, {
+    await userController.update(sessionUser, id, {
       nombre: nombre || undefined,
       email: email || undefined,
       rol
     });
   },
-  "24": createDeleteAction(
-    "ID de usuario a eliminar: ",
-    (id) => `el usuario ${id}`,
-    (id) => userController.remove(adminUser, id)
-  )
+  "24": async (rl) => {
+    if (!isAdmin(sessionUser)) {
+      console.log("❌ Esta opción es solo para usuarios ADMIN.");
+      return;
+    }
+
+    const deleteUserAction = createDeleteAction(
+      "ID de usuario a eliminar: ",
+      (id) => `el usuario ${id}`,
+      (id) => userController.remove(sessionUser, id)
+    );
+    await deleteUserAction(rl);
+  }
 };
 
 async function bootstrapCli(): Promise<void> {
   const rl = createInterface({ input, output });
   console.log("\n🎬 Bienvenido a Crunchyroll CLI");
-  console.log(`🔐 Sesión actual: ${adminUser.nombre} (${adminUser.rol})\n`);
+  // Pick the session user before showing the menu.
+  sessionUser = await selectSessionUser(rl);
+  console.log(`\n🔐 Sesión actual: ${sessionUser.nombre} (${sessionUser.rol})\n`);
 
   while (true) {
-    printMenu();
+    printMenu(sessionUser);
     const option = (await rl.question("\nSelecciona una opción: ")).trim();
 
     if (option === "0") {

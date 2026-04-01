@@ -79,6 +79,11 @@ Validated on `2026-03-31`:
 bun run src/index.ts
 ```
 
+When the app starts, you choose the session user from a list (no password prompt).
+
+- `ADMIN` can use all options.
+- `USER` can use functional modules, but admin user-management options are restricted (`21-24`).
+
 ## Type Check
 
 ```bash

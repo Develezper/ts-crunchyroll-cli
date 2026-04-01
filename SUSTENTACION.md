@@ -16,6 +16,7 @@ La meta no fue solo “que funcione”, sino demostrar:
 - tipado estricto
 - reglas de negocio claras
 - capacidad de explicación técnica por cada integrante
+- control de acceso por rol en el flujo CLI (sesión elegida al inicio)
 
 ## 2. Reparto De Exposición Por Dev
 
@@ -269,6 +270,14 @@ Cumplido:
 - `presentation/views` para salida
 - `index.ts` como punto de entrada
 
+## 4.6 Control por rol en CLI (sin contraseña)
+
+Cumplido:
+
+- al iniciar la app se selecciona usuario de sesión desde lista activa (sin contraseña)
+- opciones de users (`21` a `24`) se habilitan solo para `ADMIN`
+- usuarios `USER` pueden operar módulos funcionales, pero no gestión administrativa de users
+
 ## 5. Criterios De Evaluación (Cómo Demostrar Cada Uno)
 
 ## 5.1 Funcionalidad
@@ -276,7 +285,8 @@ Cumplido:
 Demostrar en vivo:
 
 1. Ejecutar `bun run src/index.ts`.
-2. Mostrar menú funcional y salida limpia.
+2. Seleccionar usuario de sesión al iniciar (sin contraseña).
+3. Mostrar menú funcional y salida limpia.
 
 ## 5.2 CRUD completo
 

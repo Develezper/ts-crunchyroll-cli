@@ -24,6 +24,8 @@ Funcionalidades implementadas:
 - CRUD de Episodes
 - Gestión administrativa de Users (listar, crear, actualizar, borrado lógico)
 - Decorador activo para logging en servicios (`LogExecution`)
+- Selección de usuario de sesión al inicio (sin contraseña)
+- Restricción por rol en menú: opciones de users (`21` a `24`) solo para `ADMIN`
 
 ## 3. Arquitectura Actual (Real Del Repositorio)
 
