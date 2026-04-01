@@ -207,6 +207,10 @@ main {
   gap: 1.2rem;
 }
 
+main section[id] {
+  scroll-margin-top: 100px;
+}
+
 .panel {
   background: rgba(23, 23, 29, 0.95);
   border: 1px solid var(--line);

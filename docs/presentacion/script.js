@@ -7,6 +7,77 @@ const shotContainers = Array.from(document.querySelectorAll("[data-shot]"));
 
 const sectionById = new Map(sections.map((section) => [section.id, section]));
 
+function getHeaderOffset() {
+  const topbar = document.querySelector(".topbar");
+  if (!topbar) {
+    return 0;
+  }
+
+  return topbar.getBoundingClientRect().height + 10;
+}
+
+function scrollToSection(section) {
+  const top = window.scrollY + section.getBoundingClientRect().top - getHeaderOffset();
+  window.scrollTo({ top, behavior: "smooth" });
+}
+
+function resolveNavSectionId(sectionId) {
+  if (navLinks.some((link) => link.getAttribute("href") === `#${sectionId}`)) {
+    return sectionId;
+  }
+
+  // Map internal sections (without nav tab) to the nearest logical tab.
+  if (sectionId === "decoradores") {
+    return "temas";
+  }
+  if (sectionId === "cierre") {
+    return "demo";
+  }
+
+  return null;
+}
+
+function setActiveNavBySection(sectionId) {
+  const navSectionId = resolveNavSectionId(sectionId);
+  if (!navSectionId) {
+    return;
+  }
+
+  for (const link of navLinks) {
+    const isActive = link.getAttribute("href") === `#${navSectionId}`;
+    link.classList.toggle("is-active", isActive);
+  }
+}
+
+function getCurrentSectionIndex() {
+  const anchorY = window.scrollY + getHeaderOffset() + 20;
+  let currentIndex = 0;
+
+  for (let index = 0; index < sections.length; index += 1) {
+    const section = sections[index];
+    if (!section) {
+      continue;
+    }
+
+    const sectionTop = section.offsetTop;
+    if (sectionTop <= anchorY) {
+      currentIndex = index;
+    }
+  }
+
+  return currentIndex;
+}
+
+function updateActiveNavFromScroll() {
+  const currentIndex = getCurrentSectionIndex();
+  const currentSection = sections[currentIndex];
+  if (!currentSection) {
+    return;
+  }
+
+  setActiveNavBySection(currentSection.id);
+}
+
 const revealObserver = new IntersectionObserver(
   (entries) => {
     for (const entry of entries) {
@@ -71,47 +142,31 @@ for (const container of shotContainers) {
   });
 }
 
-const sectionObserver = new IntersectionObserver(
-  (entries) => {
-    const visible = entries
-      .filter((entry) => entry.isIntersecting)
-      .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-
-    if (!visible) {
+let scrollRafId = 0;
+window.addEventListener(
+  "scroll",
+  () => {
+    if (scrollRafId) {
       return;
     }
 
-    const activeId = visible.target.id;
-    for (const link of navLinks) {
-      const isActive = link.getAttribute("href") === `#${activeId}`;
-      link.classList.toggle("is-active", isActive);
-    }
+    scrollRafId = window.requestAnimationFrame(() => {
+      updateActiveNavFromScroll();
+      scrollRafId = 0;
+    });
   },
-  {
-    rootMargin: "-35% 0px -45% 0px",
-    threshold: [0.2, 0.4, 0.6]
-  }
+  { passive: true }
 );
 
-for (const section of sections) {
-  sectionObserver.observe(section);
-}
+window.addEventListener("resize", updateActiveNavFromScroll);
 
 document.addEventListener("keydown", (event) => {
   if (event.key !== "ArrowDown" && event.key !== "ArrowUp") {
     return;
   }
 
-  const activeLink = navLinks.find((link) => link.classList.contains("is-active"));
-  const activeId = activeLink?.getAttribute("href")?.replace("#", "") ?? sections[0]?.id;
-  if (!activeId) {
-    return;
-  }
-
-  const activeIndex = sections.findIndex((section) => section.id === activeId);
-  if (activeIndex < 0) {
-    return;
-  }
+  event.preventDefault();
+  const activeIndex = getCurrentSectionIndex();
 
   const nextIndex =
     event.key === "ArrowDown"
@@ -123,11 +178,13 @@ document.addEventListener("keydown", (event) => {
     return;
   }
 
-  target.scrollIntoView({ behavior: "smooth", block: "start" });
+  scrollToSection(target);
 });
 
 for (const link of navLinks) {
-  link.addEventListener("click", () => {
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+
     const id = link.getAttribute("href")?.replace("#", "");
     if (!id) {
       return;
@@ -138,10 +195,9 @@ for (const link of navLinks) {
       return;
     }
 
-    for (const item of navLinks) {
-      item.classList.remove("is-active");
-    }
-    link.classList.add("is-active");
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    setActiveNavBySection(id);
+    scrollToSection(target);
   });
 }
+
+updateActiveNavFromScroll();
