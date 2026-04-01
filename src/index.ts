@@ -31,30 +31,41 @@ const INVALID_ROLE = "❌ Rol inválido. Debe ser ADMIN o USER.";
 const INVALID_NUMERIC_DATA = "❌ Datos numéricos inválidos.";
 
 const MENU_TEXT = `===== MENÚ PRINCIPAL =====
+
+--- CATEGORÍAS ---
 1. Listar categorías
 2. Crear categoría
 3. Buscar categoría por ID
 4. Actualizar categoría
 5. Eliminar categoría
+
+--- SERIES ---
 6. Listar series
 7. Crear serie
 8. Buscar serie por ID
 9. Actualizar serie
 10. Eliminar serie
 11. Filtrar series por categoría
+
+--- TEMPORADAS ---
 12. Listar temporadas
 13. Crear temporada
 14. Actualizar temporada
 15. Eliminar temporada
+
+--- EPISODIOS ---
 16. Listar episodios por temporada
 17. Crear episodio
 18. Actualizar episodio
 19. Eliminar episodio
 20. Listar todos los episodios
+
+--- USUARIOS ---
 21. Listar usuarios activos
 22. Crear usuario
 23. Actualizar usuario
 24. Eliminar usuario (borrado lógico)
+
 0. Salir`;
 
 // Composition root.

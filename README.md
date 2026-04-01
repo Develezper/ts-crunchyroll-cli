@@ -16,7 +16,7 @@ Build a maintainable, strictly typed app that is easy to explain during project 
 
 ```txt
 src/
-├── index.ts                      # entrypoint and CLI menu
+├── index.ts                      # entrypoint and sectioned CLI menu
 ├── data.ts                       # user seed data
 ├── domain/
 │   ├── entities/                 # domain models

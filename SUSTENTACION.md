@@ -115,7 +115,7 @@ La meta no fue solo “que funcione”, sino demostrar:
 
 ## 2.4 Archivos Compartidos (los 3 devs deben entenderlos)
 
-- `src/index.ts` (menú CLI y orquestación)
+- `src/index.ts` (menú CLI por secciones y orquestación)
 - `src/presentation/controllers/BaseController.ts` (manejo común de errores)
 - `src/presentation/views/CommonView.ts` (salida estándar)
 - `src/shared/decorators/LogExecution.ts`

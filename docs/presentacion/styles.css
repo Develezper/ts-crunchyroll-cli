@@ -299,6 +299,8 @@ main {
 .panel > .grid + .grid,
 .panel > .grid + .code-card,
 .panel > .table-wrap + .code-card,
+.panel > .table-wrap + .card,
+.panel > .card + .code-card,
 .panel > .grid + .table-wrap,
 .panel > .code-card + .grid {
   margin-top: 1rem;

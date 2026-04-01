@@ -29,7 +29,7 @@ Funcionalidades implementadas:
 
 ```txt
 src/
-├── index.ts                            # Entry point + menú CLI
+├── index.ts                            # Entry point + menú CLI por secciones
 ├── data.ts                             # Seed inicial de usuarios
 ├── domain/
 │   ├── entities/                       # Modelos de dominio
@@ -186,7 +186,7 @@ Archivos foco:
 
 ## 5.4 Archivos Compartidos (coordinación de los 3)
 
-- `src/index.ts` (orquestación de menú y wiring)
+- `src/index.ts` (orquestación de menú por secciones y wiring)
 - `src/presentation/controllers/BaseController.ts`
 - `src/presentation/views/CommonView.ts`
 - `src/shared/decorators/LogExecution.ts`

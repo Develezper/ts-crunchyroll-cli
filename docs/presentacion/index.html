@@ -309,6 +309,11 @@
                 <td><code>tsconfig.json strict: true</code></td>
               </tr>
               <tr>
+                <td>CRUD completo (Create, Read, Update, Delete)</td>
+                <td><span class="ok">Cumplido</span></td>
+                <td>Menu CLI por secciones en <code>src/index.ts</code> + services por dominio</td>
+              </tr>
+              <tr>
                 <td>Separacion de responsabilidades</td>
                 <td><span class="ok">Cumplido</span></td>
                 <td>Controllers delgados, reglas en services</td>
@@ -316,6 +321,79 @@
             </tbody>
           </table>
         </div>
+
+        <article class="card">
+          <h4>Matriz CRUD por dominio</h4>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Dominio</th>
+                  <th>Create</th>
+                  <th>Read</th>
+                  <th>Update</th>
+                  <th>Delete</th>
+                  <th>Service</th>
+                  <th>Controller</th>
+                  <th>Menu</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Users</td>
+                  <td><code>createUser</code></td>
+                  <td><code>getAllActiveUsers</code></td>
+                  <td><code>updateUser</code></td>
+                  <td><code>softDeleteUser</code></td>
+                  <td><code>UserService.ts</code></td>
+                  <td><code>UserController.ts</code></td>
+                  <td><code>21,22,23,24</code></td>
+                </tr>
+                <tr>
+                  <td>Categories</td>
+                  <td><code>create</code></td>
+                  <td><code>findAll</code>, <code>findById</code></td>
+                  <td><code>update</code></td>
+                  <td><code>remove</code></td>
+                  <td><code>CategoryService.ts</code></td>
+                  <td><code>CategoryController.ts</code></td>
+                  <td><code>1,2,3,4,5</code></td>
+                </tr>
+                <tr>
+                  <td>Series</td>
+                  <td><code>create</code></td>
+                  <td><code>findAll</code>, <code>findById</code>, <code>findByCategory</code></td>
+                  <td><code>update</code></td>
+                  <td><code>remove</code></td>
+                  <td><code>SeriesService.ts</code></td>
+                  <td><code>SeriesController.ts</code></td>
+                  <td><code>6,7,8,9,10,11</code></td>
+                </tr>
+                <tr>
+                  <td>Seasons</td>
+                  <td><code>create</code></td>
+                  <td><code>findAll</code>, <code>findBySeries</code></td>
+                  <td><code>update</code></td>
+                  <td><code>remove</code> (cascada)</td>
+                  <td><code>SeasonService.ts</code></td>
+                  <td><code>SeasonEpisodeController.ts</code></td>
+                  <td><code>12,13,14,15</code></td>
+                </tr>
+                <tr>
+                  <td>Episodes</td>
+                  <td><code>create</code></td>
+                  <td><code>findBySeason</code>, <code>findAll</code></td>
+                  <td><code>update</code></td>
+                  <td><code>remove</code></td>
+                  <td><code>EpisodeService.ts</code></td>
+                  <td><code>SeasonEpisodeController.ts</code></td>
+                  <td><code>16,17,18,19,20</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
         <article class="code-card">
           <div class="code-head">
             <span>Tipado estricto</span>
