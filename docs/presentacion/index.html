@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sustentacion - Cell Kernel</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-a" aria-hidden="true"></div>
+    <div class="bg-orb orb-b" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-copy">
+          <span class="brand-kicker">Cell Kernel - Ruta Avanzada TS</span>
+          <h1>Kernel | Crunchyroll CLI</h1>
+        </div>
+        <div class="logo-box" data-logo-box>
+          <img
+            data-logo
+            src="https://i.ytimg.com/vi/7VRep6FNeIg/maxresdefault.jpg"
+            alt="Crunchyroll reference logo"
+            loading="lazy"
+          />
+          <div class="logo-placeholder">
+            <strong>Logo Crunchyroll</strong>
+            <span>Si no carga, usa <code>docs/presentacion/assets/crunchyroll-logo.png</code></span>
+          </div>
+        </div>
+      </div>
+      <nav class="topnav" aria-label="Secciones de la presentacion">
+        <a href="#overview">Overview</a>
+        <a href="#arquitectura">Arquitectura</a>
+        <a href="#roles">Roles</a>
+        <a href="#temas">Temas</a>
+        <a href="#requisitos">Requisitos</a>
+        <a href="#demo">Demo</a>
+      </nav>
+    </header>
+
+    <main>
+      <section id="overview" class="panel hero reveal">
+        <p class="kicker">Presentacion tecnica</p>
+        <h2>CRUD por consola con arquitectura modular y TypeScript estricto</h2>
+        <p class="lead">
+          Presentado por la celula Kernel: una app inspirada en Crunchyroll para gestionar Users,
+          Categories, Series, Seasons y Episodes. El objetivo no fue solo que corra, sino que sea
+          explicable, mantenible y bien tipada.
+        </p>
+        <div class="hero-chips">
+          <span>CLI en espanol</span>
+          <span>Zero any</span>
+          <span>Decorador activo</span>
+          <span>Clean layering</span>
+        </div>
+      </section>
+
+      <section id="arquitectura" class="panel reveal">
+        <div class="section-head">
+          <p class="kicker">01</p>
+          <h3>Arquitectura real del proyecto</h3>
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <h4>Capas</h4>
+            <ul>
+              <li><code>domain</code>: entidades y contratos</li>
+              <li><code>application</code>: reglas de negocio</li>
+              <li><code>infrastructure</code>: repositorios en memoria</li>
+              <li><code>presentation</code>: controllers + views CLI</li>
+              <li><code>shared</code>: decoradores, errores y utils</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h4>Direccion de dependencias</h4>
+            <ul>
+              <li><code>presentation -> application -> domain</code></li>
+              <li><code>infrastructure -> domain</code></li>
+              <li><code>shared</code> transversal</li>
+            </ul>
+          </article>
+        </div>
+        <article class="code-card">
+          <div class="code-head">
+            <span>Evidencia</span>
+            <code>Estructura real del proyecto</code>
+          </div>
+          <figure class="evidence-shot" data-shot>
+            <img
+              src="./assets/evidencias/01-arquitectura-src.png"
+              alt="Captura de la estructura src del proyecto"
+              loading="lazy"
+            />
+            <div class="shot-placeholder">
+              <strong>Pega la captura aqui</strong>
+              <span><code>docs/presentacion/assets/evidencias/01-arquitectura-src.png</code></span>
+              <small>Sugerencia: captura el arbol de carpetas en el explorador del IDE.</small>
+            </div>
+          </figure>
+        </article>
+      </section>
+
+      <section id="roles" class="panel reveal">
+        <div class="section-head">
+          <p class="kicker">02</p>
+          <h3>Reparto de exposicion por Dev</h3>
+        </div>
+        <div class="grid three role-grid">
+          <article class="card role">
+            <h4>Dev 1 - Users</h4>
+            <p>CRUD admin de usuarios, validaciones de email, permisos y borrado logico.</p>
+            <p class="mini-title">Archivos clave</p>
+            <ul class="compact">
+              <li><code>domain/entities/User.ts</code></li>
+              <li><code>application/services/UserService.ts</code></li>
+              <li><code>repositories/InMemoryUserRepository.ts</code></li>
+              <li><code>controllers/UserController.ts</code></li>
+            </ul>
+          </article>
+
+          <article class="card role">
+            <h4>Dev 2 - Categories + Series</h4>
+            <p>CRUD, filtros, integridad category-series y bloqueo de eliminacion invalida.</p>
+            <p class="mini-title">Archivos clave</p>
+            <ul class="compact">
+              <li><code>CategoryService.ts</code></li>
+              <li><code>SeriesService.ts</code></li>
+              <li><code>InMemoryCategoryRepository.ts</code></li>
+              <li><code>InMemorySeriesRepository.ts</code></li>
+            </ul>
+          </article>
+
+          <article class="card role">
+            <h4>Dev 3 - Seasons + Episodes</h4>
+            <p>CRUD, validaciones de numero/duracion y cascadas para evitar datos huerfanos.</p>
+            <p class="mini-title">Archivos clave</p>
+            <ul class="compact">
+              <li><code>SeasonService.ts</code></li>
+              <li><code>EpisodeService.ts</code></li>
+              <li><code>InMemorySeasonRepository.ts</code></li>
+              <li><code>InMemoryEpisodeRepository.ts</code></li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="temas" class="panel reveal">
+        <div class="section-head">
+          <p class="kicker">03</p>
+          <h3>Temas investigados y aplicacion en codigo</h3>
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <h4>Clases en TypeScript</h4>
+            <ul>
+              <li>Constructores y entidades por dominio</li>
+              <li><code>public</code>, <code>private</code>, <code>protected</code></li>
+              <li>Herencia con <code>extends</code></li>
+              <li>Interfaces de repositorio</li>
+              <li>Propiedades <code>readonly</code></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h4>Namespaces</h4>
+            <ul>
+              <li>No se usan namespaces</li>
+              <li>Se usa modularidad ES con <code>import/export</code></li>
+              <li>Alineado con TypeScript moderno en Node</li>
+              <li>Soportado por <code>moduleResolution: "bundler"</code></li>
+            </ul>
+          </article>
+        </div>
+        <div class="grid two stack">
+          <article class="code-card">
+            <div class="code-head">
+              <span>Clase + readonly</span>
+              <code>src/domain/entities/User.ts</code>
+            </div>
+            <figure class="evidence-shot" data-shot>
+              <img
+                src="./assets/evidencias/02-user-class-readonly.png"
+                alt="Captura de User.ts mostrando clase, constructor y readonly"
+                loading="lazy"
+              />
+              <div class="shot-placeholder">
+                <strong>Pega la captura aqui</strong>
+                <span><code>docs/presentacion/assets/evidencias/02-user-class-readonly.png</code></span>
+                <small>
+                  Sugerencia: mostrar <code>public readonly id</code> y
+                  <code>public readonly fechaCreacion</code>.
+                </small>
+              </div>
+            </figure>
+          </article>
+          <article class="code-card">
+            <div class="code-head">
+              <span>Herencia + abstract</span>
+              <code>src/presentation/controllers/BaseController.ts</code>
+            </div>
+            <figure class="evidence-shot full-width-shot" data-shot>
+              <img
+                src="./assets/evidencias/03-extends-abstract-controller.png"
+                alt="Captura de BaseController y UserController con extends"
+                loading="lazy"
+              />
+              <div class="shot-placeholder">
+                <strong>Pega la captura aqui</strong>
+                <span>
+                  <code>
+                    docs/presentacion/assets/evidencias/03-extends-abstract-controller.png
+                  </code>
+                </span>
+                <small>
+                  Sugerencia: incluir <code>abstract class BaseController</code> y
+                  <code>UserController extends BaseController</code>.
+                </small>
+              </div>
+            </figure>
+          </article>
+        </div>
+      </section>
+
+      <section id="decoradores" class="panel reveal">
+        <div class="section-head">
+          <p class="kicker">04</p>
+          <h3>Decoradores: implementacion real</h3>
+        </div>
+        <div class="grid two stack">
+          <article class="code-card">
+            <div class="code-head">
+              <span>Declaracion del decorador</span>
+              <code>src/shared/decorators/LogExecution.ts</code>
+            </div>
+            <figure class="evidence-shot" data-shot>
+              <img
+                src="./assets/evidencias/04-decorator-definition.png"
+                alt="Captura del decorador LogExecution"
+                loading="lazy"
+              />
+              <div class="shot-placeholder">
+                <strong>Pega la captura aqui</strong>
+                <span>
+                  <code>docs/presentacion/assets/evidencias/04-decorator-definition.png</code>
+                </span>
+                <small>Sugerencia: mostrar la funcion <code>LogExecution</code> completa.</small>
+              </div>
+            </figure>
+          </article>
+          <article class="code-card">
+            <div class="code-head">
+              <span>Uso en servicios</span>
+              <code>src/application/services/*.ts</code>
+            </div>
+            <figure class="evidence-shot" data-shot>
+              <img
+                src="./assets/evidencias/05-decorator-usage-services.png"
+                alt="Captura de servicios usando @LogExecution"
+                loading="lazy"
+              />
+              <div class="shot-placeholder">
+                <strong>Pega la captura aqui</strong>
+                <span>
+                  <code>docs/presentacion/assets/evidencias/05-decorator-usage-services.png</code>
+                </span>
+                <small>
+                  Sugerencia: capturar <code>@LogExecution("Crear categoria")</code> en
+                  <code>CategoryService</code>.
+                </small>
+              </div>
+            </figure>
+          </article>
+        </div>
+      </section>
+
+      <section id="requisitos" class="panel reveal">
+        <div class="section-head">
+          <p class="kicker">05</p>
+          <h3>Requisitos tecnicos y evidencia</h3>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Requisito</th>
+                <th>Estado</th>
+                <th>Donde se ve</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Arquitectura modular en <code>src/</code></td>
+                <td><span class="ok">Cumplido</span></td>
+                <td><code>domain/application/infrastructure/presentation/shared</code></td>
+              </tr>
+              <tr>
+                <td>Clases TypeScript para entidades</td>
+                <td><span class="ok">Cumplido</span></td>
+                <td><code>domain/entities/*.ts</code></td>
+              </tr>
+              <tr>
+                <td>Al menos un decorador</td>
+                <td><span class="ok">Cumplido</span></td>
+                <td><code>@LogExecution</code> en servicios</td>
+              </tr>
+              <tr>
+                <td>Tipado estricto, cero any</td>
+                <td><span class="ok">Cumplido</span></td>
+                <td><code>tsconfig.json strict: true</code></td>
+              </tr>
+              <tr>
+                <td>Separacion de responsabilidades</td>
+                <td><span class="ok">Cumplido</span></td>
+                <td>Controllers delgados, reglas en services</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <article class="code-card">
+          <div class="code-head">
+            <span>Tipado estricto</span>
+            <code>tsconfig.json</code>
+          </div>
+          <figure class="evidence-shot" data-shot>
+            <img
+              src="./assets/evidencias/06-tsconfig-strict.png"
+              alt="Captura de tsconfig con strict true"
+              loading="lazy"
+            />
+            <div class="shot-placeholder">
+              <strong>Pega la captura aqui</strong>
+              <span><code>docs/presentacion/assets/evidencias/06-tsconfig-strict.png</code></span>
+              <small>
+                Sugerencia: mostrar <code>"strict": true</code> y flags de tipado estricto.
+              </small>
+            </div>
+          </figure>
+        </article>
+      </section>
+
+      <section id="demo" class="panel reveal">
+        <div class="section-head">
+          <p class="kicker">06</p>
+          <h3>Plan de demo en sustentacion</h3>
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <h4>Comandos de validacion</h4>
+            <pre><code>npx tsc --noEmit
+bun run src/index.ts</code></pre>
+          </article>
+          <article class="card">
+            <h4>Flujo recomendado</h4>
+            <ol>
+              <li>Crear categoria y serie</li>
+              <li>Crear temporada y episodios</li>
+              <li>Probar validaciones de duplicado</li>
+              <li>Probar borrado en cascada</li>
+              <li>Probar operaciones admin de users</li>
+            </ol>
+          </article>
+        </div>
+      </section>
+
+      <section id="cierre" class="panel closing reveal">
+        <p class="kicker">Cierre</p>
+        <h3>
+          "No es solo que funcione: esta organizado, tipado y explicable por capas y por rol de
+          equipo."
+        </h3>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>
+        Cell Kernel: diseno con identidad propia, arquitectura clara y explicacion tecnica por
+        capas y por rol.
+      </p>
+    </footer>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
