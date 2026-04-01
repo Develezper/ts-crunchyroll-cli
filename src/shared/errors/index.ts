@@ -1,1 +1,1 @@
-export { AuthorizationError, NotFoundError, ValidationError } from "./AppErrors";
+export { ErrorAutorizacion, ErrorNoEncontrado, ErrorValidacion } from "./AppErrors";

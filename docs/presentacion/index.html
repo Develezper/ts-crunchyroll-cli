@@ -45,7 +45,7 @@
         <h2>CRUD por consola con arquitectura modular y TypeScript estricto</h2>
         <p class="lead">
           Presentado por la celula Kernel: una app inspirada en Crunchyroll para gestionar Users,
-          Categories, Series, Seasons y Episodes. El objetivo no fue solo que corra, sino que sea
+          Categories y Series. El objetivo no fue solo que corra, sino que sea
           explicable, mantenible y bien tipada.
         </p>
         <div class="hero-chips">
@@ -66,9 +66,9 @@
           <article class="card">
             <h4>Capas</h4>
             <ul>
-              <li><code>domain</code>: entidades y contratos</li>
+              <li><code>domain</code>: entidades</li>
               <li><code>application</code>: reglas de negocio</li>
-              <li><code>infrastructure</code>: repositorios en memoria</li>
+              <li><code>infrastructure</code>: tablas en memoria</li>
               <li><code>presentation</code>: controllers + views CLI</li>
               <li><code>shared</code>: decoradores, errores y utils</li>
             </ul>
@@ -76,8 +76,8 @@
           <article class="card">
             <h4>Direccion de dependencias</h4>
             <ul>
-              <li><code>presentation -> application -> domain</code></li>
-              <li><code>infrastructure -> domain</code></li>
+              <li><code>presentation -> application</code></li>
+              <li><code>application -> domain + infrastructure/database</code></li>
               <li><code>shared</code> transversal</li>
             </ul>
           </article>
@@ -107,7 +107,7 @@
           <p class="kicker">02</p>
           <h3>Reparto de exposicion por Dev</h3>
         </div>
-        <div class="grid three role-grid">
+        <div class="grid two role-grid">
           <article class="card role">
             <h4>Dev 1 - Users</h4>
             <p>CRUD admin de usuarios, validaciones de email, permisos y borrado logico.</p>
@@ -115,7 +115,7 @@
             <ul class="compact">
               <li><code>domain/entities/User.ts</code></li>
               <li><code>application/services/UserService.ts</code></li>
-              <li><code>repositories/InMemoryUserRepository.ts</code></li>
+              <li><code>data.ts</code></li>
               <li><code>controllers/UserController.ts</code></li>
             </ul>
           </article>
@@ -127,22 +127,11 @@
             <ul class="compact">
               <li><code>CategoryService.ts</code></li>
               <li><code>SeriesService.ts</code></li>
-              <li><code>InMemoryCategoryRepository.ts</code></li>
-              <li><code>InMemorySeriesRepository.ts</code></li>
+              <li><code>infrastructure/database/inMemoryDb.ts</code></li>
+              <li><code>controllers/CategoryController.ts</code></li>
             </ul>
           </article>
 
-          <article class="card role">
-            <h4>Dev 3 - Seasons + Episodes</h4>
-            <p>CRUD, validaciones de numero/duracion y cascadas para evitar datos huerfanos.</p>
-            <p class="mini-title">Archivos clave</p>
-            <ul class="compact">
-              <li><code>SeasonService.ts</code></li>
-              <li><code>EpisodeService.ts</code></li>
-              <li><code>InMemorySeasonRepository.ts</code></li>
-              <li><code>InMemoryEpisodeRepository.ts</code></li>
-            </ul>
-          </article>
         </div>
       </section>
 
@@ -158,7 +147,7 @@
               <li>Constructores y entidades por dominio</li>
               <li><code>public</code>, <code>private</code>, <code>protected</code></li>
               <li>Herencia con <code>extends</code></li>
-              <li>Interfaces de repositorio</li>
+              <li>Tipos del dominio (ejemplo: <code>UserProps</code>)</li>
               <li>Propiedades <code>readonly</code></li>
             </ul>
           </article>
@@ -317,7 +306,7 @@
               <tr>
                 <td>Control por rol en CLI</td>
                 <td><span class="ok">Cumplido</span></td>
-                <td>Seleccion de sesion al inicio + opciones 21-24 solo ADMIN</td>
+                <td>Seleccion de sesion al inicio + opciones 12-15 solo ADMIN</td>
               </tr>
               <tr>
                 <td>Separacion de responsabilidades</td>
@@ -353,7 +342,7 @@
                   <td><code>softDeleteUser</code></td>
                   <td><code>UserService.ts</code></td>
                   <td><code>UserController.ts</code></td>
-                  <td><code>21,22,23,24</code> (solo ADMIN)</td>
+                  <td><code>12,13,14,15</code> (solo ADMIN)</td>
                 </tr>
                 <tr>
                   <td>Categories</td>
@@ -374,26 +363,6 @@
                   <td><code>SeriesService.ts</code></td>
                   <td><code>SeriesController.ts</code></td>
                   <td><code>6,7,8,9,10,11</code></td>
-                </tr>
-                <tr>
-                  <td>Seasons</td>
-                  <td><code>create</code></td>
-                  <td><code>findAll</code>, <code>findBySeries</code></td>
-                  <td><code>update</code></td>
-                  <td><code>remove</code> (cascada)</td>
-                  <td><code>SeasonService.ts</code></td>
-                  <td><code>SeasonEpisodeController.ts</code></td>
-                  <td><code>12,13,14,15</code></td>
-                </tr>
-                <tr>
-                  <td>Episodes</td>
-                  <td><code>create</code></td>
-                  <td><code>findBySeason</code>, <code>findAll</code></td>
-                  <td><code>update</code></td>
-                  <td><code>remove</code></td>
-                  <td><code>EpisodeService.ts</code></td>
-                  <td><code>SeasonEpisodeController.ts</code></td>
-                  <td><code>16,17,18,19,20</code></td>
                 </tr>
               </tbody>
             </table>
@@ -438,11 +407,54 @@ bun run src/index.ts</code></pre>
             <ol>
               <li>Seleccionar usuario de sesion (ADMIN o USER)</li>
               <li>Crear categoria y serie</li>
-              <li>Crear temporada y episodios</li>
-              <li>Probar validaciones de duplicado</li>
-              <li>Probar borrado en cascada</li>
-              <li>Probar operaciones admin de users (21-24)</li>
+              <li>Probar validaciones de duplicado (categoria/serie)</li>
+              <li>Probar borrado de serie y categoria</li>
+              <li>Probar operaciones admin de users (12-15)</li>
             </ol>
+          </article>
+        </div>
+        <div class="grid two stack">
+          <article class="code-card">
+            <div class="code-head">
+              <span>Evidencia extra - control de roles</span>
+              <code>src/index.ts</code>
+            </div>
+            <figure class="evidence-shot" data-shot>
+              <img
+                src="./assets/evidencias/07-menu-admin-user.png"
+                alt="Captura del menu y control de opciones para ADMIN y USER"
+                loading="lazy"
+              />
+              <div class="shot-placeholder">
+                <strong>Pega la captura aqui</strong>
+                <span><code>docs/presentacion/assets/evidencias/07-menu-admin-user.png</code></span>
+                <small>
+                  Sugerencia: mostrar seleccion de sesion + bloqueo de opciones 12-15 para USER en
+                  <code>src/index.ts</code>.
+                </small>
+              </div>
+            </figure>
+          </article>
+          <article class="code-card">
+            <div class="code-head">
+              <span>Evidencia extra - flujo CRUD en consola</span>
+              <code>Terminal</code>
+            </div>
+            <figure class="evidence-shot" data-shot>
+              <img
+                src="./assets/evidencias/08-crud-flow-terminal.png"
+                alt="Captura del flujo CRUD ejecutado en consola"
+                loading="lazy"
+              />
+              <div class="shot-placeholder">
+                <strong>Pega la captura aqui</strong>
+                <span><code>docs/presentacion/assets/evidencias/08-crud-flow-terminal.png</code></span>
+                <small>
+                  Sugerencia: capturar una corrida mostrando create, read, update y delete desde la
+                  CLI.
+                </small>
+              </div>
+            </figure>
           </article>
         </div>
       </section>

@@ -1,8 +1,7 @@
-export class Series {
+export class Serie {
   constructor(
     public readonly id: number,
-    public title: string,
-    public categoryId: number,
-    public seasonIds: number[] = []
+    public titulo: string,
+    public categoriaId: number
   ) {}
 }

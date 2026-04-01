@@ -19,13 +19,11 @@ src/
 ├── index.ts                      # entrypoint and sectioned CLI menu
 ├── data.ts                       # user seed data
 ├── domain/
-│   ├── entities/                 # domain models
-│   └── interfaces/               # repository contracts
+│   └── entities/                 # domain models
 ├── application/
 │   └── services/                 # business rules and validations
 ├── infrastructure/
-│   ├── database/                 # in-memory tables
-│   └── repositories/             # contract implementations
+│   └── database/                 # in-memory tables
 ├── presentation/
 │   ├── controllers/              # use-case orchestration
 │   └── views/                    # console output formatting
@@ -35,26 +33,22 @@ src/
     └── utils/                    # shared utilities
 ```
 
+Simplification note:
+
+- Services now work directly with in-memory tables (`infrastructure/database`).
+- Repository and interface layers were removed to keep the project easier for learning.
+
 ## Entities and Modules
 
 - Users
 - Categories
 - Series
-- Seasons
-- Episodes
 
 ## Key Business Rules
 
 - Category: required and unique name.
 - Series: must reference an existing Category.
-- Season: must reference an existing Series.
-- Episode: must reference an existing Season.
-- Season/Episode number must be greater than 0.
-- Episode duration must be greater than 0.
 - You cannot delete a Category that still has related Series.
-- Cascade delete:
-  - deleting a Season deletes its Episodes
-  - deleting a Series deletes its Seasons and Episodes
 - User admin operations are restricted to `ADMIN` role.
 
 ## Functional Status (Quick Check)
@@ -65,8 +59,7 @@ Validated on `2026-03-31`:
 - `bun run src/index.ts` OK
 - Critical flows verified:
   - category deletion blocked when related series exist
-  - duplicate season/episode numbers blocked by context
-  - cascade delete from season -> episodes
+  - users role restrictions in CLI
 
 ## Language Rule
 
@@ -82,7 +75,7 @@ bun run src/index.ts
 When the app starts, you choose the session user from a list (no password prompt).
 
 - `ADMIN` can use all options.
-- `USER` can use functional modules, but admin user-management options are restricted (`21-24`).
+- `USER` can use functional modules, but admin user-management options are restricted (`12-15`).
 
 ## Type Check
 

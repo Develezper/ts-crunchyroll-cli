@@ -1,56 +1,62 @@
-import type { Rol, User } from "../../domain/entities/User";
-import { UserService } from "../../application/services/UserService";
-import { BaseController } from "./BaseController";
-import { CommonView } from "../views/CommonView";
-import { UserView } from "../views/UserView";
+import type { Rol, Usuario } from "../../domain/entities/User";
+import { ServicioUsuarios } from "../../application/services/UserService";
+import { ControladorBase } from "./BaseController";
+import { VistaComun } from "../views/CommonView";
+import { VistaUsuarios } from "../views/UserView";
 
-export class UserController extends BaseController {
-  constructor(private readonly userService: UserService) {
+export class ControladorUsuarios extends ControladorBase {
+  constructor(private readonly servicioUsuarios: ServicioUsuarios) {
     super();
   }
 
-  async create(
-    currentUser: User,
+  async crear(
+    usuarioActual: Usuario,
     data: { nombre: string; email: string; password: string; rol: Rol }
   ): Promise<void> {
-    const created = await this.executeAsync(() => this.userService.createUser(currentUser, data));
-    if (!created) {
+    const creado = await this.ejecutarAsync(() => this.servicioUsuarios.crearUsuario(usuarioActual, data));
+    if (!creado) {
       return;
     }
 
-    CommonView.showSuccess("Usuario creado correctamente.");
-    UserView.showItem(created);
+    VistaComun.mostrarExito("Usuario creado correctamente.");
+    VistaUsuarios.mostrarItem(creado);
   }
 
-  async listActive(currentUser: User): Promise<void> {
-    const users = await this.executeAsync(() => this.userService.getAllActiveUsers(currentUser));
-    if (!users) {
+  async listarActivos(usuarioActual: Usuario): Promise<void> {
+    const usuarios = await this.ejecutarAsync(() =>
+      this.servicioUsuarios.listarUsuariosActivos(usuarioActual)
+    );
+    if (!usuarios) {
       return;
     }
 
-    UserView.showList(users);
+    VistaUsuarios.mostrarLista(usuarios);
   }
 
-  async update(
-    currentUser: User,
+  async actualizar(
+    usuarioActual: Usuario,
     id: number,
     data: { nombre?: string; email?: string; rol?: Rol }
   ): Promise<void> {
-    const updated = await this.executeAsync(() => this.userService.updateUser(currentUser, id, data));
-    if (!updated) {
+    const actualizado = await this.ejecutarAsync(() =>
+      this.servicioUsuarios.actualizarUsuario(usuarioActual, id, data)
+    );
+    if (!actualizado) {
       return;
     }
 
-    CommonView.showSuccess("Usuario actualizado correctamente.");
-    UserView.showItem(updated);
+    VistaComun.mostrarExito("Usuario actualizado correctamente.");
+    VistaUsuarios.mostrarItem(actualizado);
   }
 
-  async remove(currentUser: User, id: number): Promise<void> {
-    const completed = await this.runAsync(() => this.userService.softDeleteUser(currentUser, id));
-    if (!completed) {
+  async eliminar(usuarioActual: Usuario, id: number): Promise<void> {
+    const completado = await this.ejecutarVacioAsync(() =>
+      this.servicioUsuarios.desactivarUsuario(usuarioActual, id)
+    );
+    if (!completado) {
       return;
     }
 
-    CommonView.showSuccess(`Usuario ${id} eliminado correctamente (borrado lógico).`);
+    VistaComun.mostrarExito(`Usuario ${id} eliminado correctamente (borrado lógico).`);
   }
 }

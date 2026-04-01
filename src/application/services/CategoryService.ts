@@ -1,92 +1,90 @@
-import { Category } from "../../domain/entities/Category";
-import type { CategoryRepository } from "../../domain/interfaces/CategoryRepository";
-import type { SeriesRepository } from "../../domain/interfaces/SeriesRepository";
-import { NotFoundError, ValidationError } from "../../shared/errors";
-import { generateId } from "../../shared/utils";
-import { LogExecution } from "../../shared/decorators";
+import { Categoria } from "../../domain/entities/Category";
+import { tablaCategorias, tablaSeries } from "../../infrastructure/database";
+import { ErrorNoEncontrado, ErrorValidacion } from "../../shared/errors";
+import { RegistrarEjecucion } from "../../shared/decorators";
+import { generarIdPorLista } from "../../shared/utils";
 
-export class CategoryService {
-  constructor(
-    private readonly categoryRepository: CategoryRepository,
-    private readonly seriesRepository: SeriesRepository
-  ) {}
-
-  @LogExecution("Crear categoria")
-  create(name: string, description: string): Category {
-    // Normalize and validate user input before touching persistence.
-    const trimmedName = name.trim();
-    if (!trimmedName) {
-      throw new ValidationError("El nombre de la categoria es obligatorio.");
-    }
-
-    // Enforce a business invariant: category name must be unique.
-    if (this.categoryRepository.existsByName(trimmedName)) {
-      throw new ValidationError("Ya existe una categoria con ese nombre.");
-    }
-
-    // ID is generated from current persisted data to keep it deterministic in-memory.
-    const id = generateId(this.categoryRepository.findAll());
-    return this.categoryRepository.create(new Category(id, trimmedName, description.trim()));
+export class ServicioCategorias {
+  private existePorNombre(nombre: string): boolean {
+    return tablaCategorias.some((categoria) => categoria.nombre.toLowerCase() === nombre.toLowerCase());
   }
 
-  findAll(): Category[] {
-    return this.categoryRepository.findAll();
-  }
-
-  findById(id: number): Category {
-    const category = this.categoryRepository.findById(id);
-    if (!category) {
-      throw new NotFoundError("Categoria no encontrada.");
+  @RegistrarEjecucion("Crear categoria")
+  crear(nombre: string, descripcion: string): Categoria {
+    const nombreLimpio = nombre.trim();
+    if (!nombreLimpio) {
+      throw new ErrorValidacion("El nombre de la categoria es obligatorio.");
     }
 
-    return category;
+    if (this.existePorNombre(nombreLimpio)) {
+      throw new ErrorValidacion("Ya existe una categoria con ese nombre.");
+    }
+
+    const id = generarIdPorLista(tablaCategorias);
+    const creada = new Categoria(id, nombreLimpio, descripcion.trim());
+    tablaCategorias.push(creada);
+    return creada;
   }
 
-  update(id: number, data: Partial<Omit<Category, "id">>): Category {
-    if (data.name !== undefined) {
-      const trimmedName = data.name.trim();
-      if (!trimmedName) {
-        throw new ValidationError("El nombre de la categoria no puede estar vacio.");
+  listar(): Categoria[] {
+    return tablaCategorias;
+  }
+
+  buscarPorId(id: number): Categoria {
+    const categoria = tablaCategorias.find((item) => item.id === id);
+    if (!categoria) {
+      throw new ErrorNoEncontrado("Categoria no encontrada.");
+    }
+
+    return categoria;
+  }
+
+  actualizar(id: number, data: Partial<Omit<Categoria, "id">>): Categoria {
+    if (data.nombre !== undefined) {
+      const nombreLimpio = data.nombre.trim();
+      if (!nombreLimpio) {
+        throw new ErrorValidacion("El nombre de la categoria no puede estar vacio.");
       }
 
-      const existingCategory = this.categoryRepository.findById(id);
-      if (!existingCategory) {
-        throw new NotFoundError("Categoria no encontrada para actualizar.");
+      const categoriaExistente = tablaCategorias.find((item) => item.id === id);
+      if (!categoriaExistente) {
+        throw new ErrorNoEncontrado("Categoria no encontrada para actualizar.");
       }
 
       if (
-        existingCategory.name.toLowerCase() !== trimmedName.toLowerCase() &&
-        this.categoryRepository.existsByName(trimmedName)
+        categoriaExistente.nombre.toLowerCase() !== nombreLimpio.toLowerCase() &&
+        this.existePorNombre(nombreLimpio)
       ) {
-        throw new ValidationError("Ya existe una categoria con ese nombre.");
+        throw new ErrorValidacion("Ya existe una categoria con ese nombre.");
       }
     }
 
-    const safeData: Partial<Omit<Category, "id">> = {
+    const datosSeguros: Partial<Omit<Categoria, "id">> = {
       ...data,
-      name: data.name?.trim(),
-      description: data.description?.trim()
+      nombre: data.nombre?.trim(),
+      descripcion: data.descripcion?.trim()
     };
 
-    const updated = this.categoryRepository.update(id, safeData);
-    if (!updated) {
-      throw new NotFoundError("Categoria no encontrada para actualizar.");
+    const categoria = tablaCategorias.find((item) => item.id === id);
+    if (!categoria) {
+      throw new ErrorNoEncontrado("Categoria no encontrada para actualizar.");
     }
 
-    return updated;
+    Object.assign(categoria, datosSeguros);
+    return categoria;
   }
 
-  remove(id: number): void {
-    const relatedSeries = this.seriesRepository.findByCategoryId(id);
-    if (relatedSeries.length > 0) {
-      throw new ValidationError(
-        "No se puede eliminar la categoria porque tiene series asociadas."
-      );
+  eliminar(id: number): void {
+    const seriesRelacionadas = tablaSeries.filter((serie) => serie.categoriaId === id);
+    if (seriesRelacionadas.length > 0) {
+      throw new ErrorValidacion("No se puede eliminar la categoria porque tiene series asociadas.");
     }
 
-    const removed = this.categoryRepository.delete(id);
-    if (!removed) {
-      throw new NotFoundError("Categoria no encontrada para eliminar.");
+    const indice = tablaCategorias.findIndex((item) => item.id === id);
+    if (indice < 0) {
+      throw new ErrorNoEncontrado("Categoria no encontrada para eliminar.");
     }
+
+    tablaCategorias.splice(indice, 1);
   }
 }

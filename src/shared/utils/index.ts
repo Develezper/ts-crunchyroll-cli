@@ -1,26 +1,26 @@
-import type { User } from "../../domain/entities/User";
-import { AuthorizationError } from "../errors";
+import type { Usuario } from "../../domain/entities/User";
+import { ErrorAutorizacion } from "../errors";
 
-let currentId = 1;
+let idActual = 1;
 
-export function generateId(items: Array<{ id: number }>): number {
-  if (items.length === 0) {
+export function generarIdPorLista(elementos: Array<{ id: number }>): number {
+  if (elementos.length === 0) {
     return 1;
   }
 
-  return Math.max(...items.map((item) => item.id)) + 1;
+  return Math.max(...elementos.map((elemento) => elemento.id)) + 1;
 }
 
-export function generarId(): number {
-  return currentId++;
+export function generarIdSecuencial(): number {
+  return idActual++;
 }
 
-export function setGenerarId(baseId: number): void {
-  currentId = baseId;
+export function fijarIdSecuencial(idBase: number): void {
+  idActual = idBase;
 }
 
-export function validarAdmin(user: User | null | undefined): void {
-  if (!user || user.rol !== "ADMIN") {
-    throw new AuthorizationError("No tienes permisos para esta accion. Se requiere rol ADMIN.");
+export function validarAdmin(usuario: Usuario | null | undefined): void {
+  if (!usuario || usuario.rol !== "ADMIN") {
+    throw new ErrorAutorizacion("No tienes permisos para esta accion. Se requiere rol ADMIN.");
   }
 }

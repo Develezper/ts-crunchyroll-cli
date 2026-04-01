@@ -1,57 +1,57 @@
-import { CategoryService } from "../../application/services/CategoryService";
-import { BaseController } from "./BaseController";
-import { CategoryView } from "../views/CategoryView";
-import { CommonView } from "../views/CommonView";
+import { ServicioCategorias } from "../../application/services/CategoryService";
+import { ControladorBase } from "./BaseController";
+import { VistaCategorias } from "../views/CategoryView";
+import { VistaComun } from "../views/CommonView";
 
-export class CategoryController extends BaseController {
-  constructor(private readonly categoryService: CategoryService) {
+export class ControladorCategorias extends ControladorBase {
+  constructor(private readonly servicioCategorias: ServicioCategorias) {
     super();
   }
 
-  create(name: string, description: string): void {
-    const created = this.execute(() => this.categoryService.create(name, description));
-    if (!created) {
+  crear(nombre: string, descripcion: string): void {
+    const creada = this.ejecutar(() => this.servicioCategorias.crear(nombre, descripcion));
+    if (!creada) {
       return;
     }
 
-    CommonView.showSuccess("Categoria creada correctamente.");
-    CategoryView.showItem(created);
+    VistaComun.mostrarExito("Categoria creada correctamente.");
+    VistaCategorias.mostrarItem(creada);
   }
 
-  list(): void {
-    const categories = this.execute(() => this.categoryService.findAll());
-    if (!categories) {
+  listar(): void {
+    const categorias = this.ejecutar(() => this.servicioCategorias.listar());
+    if (!categorias) {
       return;
     }
 
-    CategoryView.showList(categories);
+    VistaCategorias.mostrarLista(categorias);
   }
 
-  getById(id: number): void {
-    const category = this.execute(() => this.categoryService.findById(id));
-    if (!category) {
+  buscarPorId(id: number): void {
+    const categoria = this.ejecutar(() => this.servicioCategorias.buscarPorId(id));
+    if (!categoria) {
       return;
     }
 
-    CategoryView.showItem(category);
+    VistaCategorias.mostrarItem(categoria);
   }
 
-  update(id: number, data: { name?: string; description?: string }): void {
-    const updated = this.execute(() => this.categoryService.update(id, data));
-    if (!updated) {
+  actualizar(id: number, data: { nombre?: string; descripcion?: string }): void {
+    const actualizada = this.ejecutar(() => this.servicioCategorias.actualizar(id, data));
+    if (!actualizada) {
       return;
     }
 
-    CommonView.showSuccess("Categoria actualizada correctamente.");
-    CategoryView.showItem(updated);
+    VistaComun.mostrarExito("Categoria actualizada correctamente.");
+    VistaCategorias.mostrarItem(actualizada);
   }
 
-  remove(id: number): void {
-    const completed = this.run(() => this.categoryService.remove(id));
-    if (!completed) {
+  eliminar(id: number): void {
+    const completado = this.ejecutarVacio(() => this.servicioCategorias.eliminar(id));
+    if (!completado) {
       return;
     }
 
-    CommonView.showSuccess(`Categoria ${id} eliminada correctamente.`);
+    VistaComun.mostrarExito(`Categoria ${id} eliminada correctamente.`);
   }
 }

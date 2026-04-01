@@ -1,31 +1,31 @@
-import { User } from "../../domain/entities/User";
+import { Usuario } from "../../domain/entities/User";
 
-export class UserView {
-  static showItem(user: User): void {
+export class VistaUsuarios {
+  static mostrarItem(usuario: Usuario): void {
     console.log(
-      `👤 Usuario [${user.id}] ${user.nombre} | ${user.email} | Rol: ${user.rol} | Estado: ${
-        user.activo ? "Activo" : "Inactivo"
+      `👤 Usuario [${usuario.id}] ${usuario.nombre} | ${usuario.email} | Rol: ${usuario.rol} | Estado: ${
+        usuario.activo ? "Activo" : "Inactivo"
       }`
     );
   }
 
-  static showList(users: User[]): void {
+  static mostrarLista(usuarios: Usuario[]): void {
     console.log("\n👤 Usuarios:\n");
 
-    if (users.length === 0) {
+    if (usuarios.length === 0) {
       console.log("- Sin registros.");
       return;
     }
 
     console.table(
-      users.map((user) => ({
-        ID: user.id,
-        Nombre: user.nombre,
-        Email: user.email,
-        Rol: user.rol,
-        Estado: user.activo ? "Activo" : "Inactivo",
-        Favoritos: user.favoritos.length,
-        Historial: user.historial.length
+      usuarios.map((usuario) => ({
+        ID: usuario.id,
+        Nombre: usuario.nombre,
+        Email: usuario.email,
+        Rol: usuario.rol,
+        Estado: usuario.activo ? "Activo" : "Inactivo",
+        Favoritos: usuario.favoritos.length,
+        Historial: usuario.historial.length
       }))
     );
   }

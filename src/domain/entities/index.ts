@@ -1,4 +1,4 @@
-export { Category } from "./Category";
-export { Series } from "./Series";
-export { Season } from "./Season";
-export { Episode } from "./Episode";
+export { Categoria } from "./Category";
+export { Serie } from "./Series";
+export { Usuario } from "./User";
+export type { Rol, PropiedadesUsuario } from "./User";

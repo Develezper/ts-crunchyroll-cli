@@ -1,6 +1,6 @@
 export type Rol = "ADMIN" | "USER";
 
-export interface UserProps {
+export interface PropiedadesUsuario {
   id: number;
   nombre: string;
   email: string;
@@ -12,7 +12,7 @@ export interface UserProps {
   fechaCreacion: Date;
 }
 
-export class User {
+export class Usuario {
   public readonly id: number;
   public nombre: string;
   public email: string;
@@ -23,15 +23,15 @@ export class User {
   public activo: boolean;
   public readonly fechaCreacion: Date;
 
-  constructor(props: UserProps) {
-    this.id = props.id;
-    this.nombre = props.nombre;
-    this.email = props.email;
-    this.password = props.password;
-    this.rol = props.rol;
-    this.favoritos = props.favoritos;
-    this.historial = props.historial;
-    this.activo = props.activo;
-    this.fechaCreacion = props.fechaCreacion;
+  constructor(propiedades: PropiedadesUsuario) {
+    this.id = propiedades.id;
+    this.nombre = propiedades.nombre;
+    this.email = propiedades.email;
+    this.password = propiedades.password;
+    this.rol = propiedades.rol;
+    this.favoritos = propiedades.favoritos;
+    this.historial = propiedades.historial;
+    this.activo = propiedades.activo;
+    this.fechaCreacion = propiedades.fechaCreacion;
   }
 }

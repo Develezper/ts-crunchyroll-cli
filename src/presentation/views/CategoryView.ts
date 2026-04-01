@@ -1,14 +1,14 @@
-import { Category } from "../../domain/entities/Category";
+import { Categoria } from "../../domain/entities/Category";
 
-export class CategoryView {
-  static showItem(category: Category): void {
-    console.log(`📂 Categoria [${category.id}] ${category.name}: ${category.description}`);
+export class VistaCategorias {
+  static mostrarItem(categoria: Categoria): void {
+    console.log(`📂 Categoria [${categoria.id}] ${categoria.nombre}: ${categoria.descripcion}`);
   }
 
-  static showList(categories: Category[]): void {
+  static mostrarLista(categorias: Categoria[]): void {
     console.log("\n📂 Categorias:\n");
-    for (const category of categories) {
-      console.log(`- [${category.id}] ${category.name}: ${category.description}`);
+    for (const categoria of categorias) {
+      console.log(`- [${categoria.id}] ${categoria.nombre}: ${categoria.descripcion}`);
     }
   }
 }

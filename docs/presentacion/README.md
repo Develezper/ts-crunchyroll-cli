@@ -42,6 +42,8 @@ Coloca estas imágenes en:
 - `docs/presentacion/assets/evidencias/04-decorator-definition.png`
 - `docs/presentacion/assets/evidencias/05-decorator-usage-services.png`
 - `docs/presentacion/assets/evidencias/06-tsconfig-strict.png`
+- `docs/presentacion/assets/evidencias/07-menu-admin-user.png`
+- `docs/presentacion/assets/evidencias/08-crud-flow-terminal.png`
 
 Sugerencia de qué capturar:
 
@@ -51,6 +53,8 @@ Sugerencia de qué capturar:
 4. `src/shared/decorators/LogExecution.ts`.
 5. Un servicio con `@LogExecution` (por ejemplo `CategoryService.ts`).
 6. `tsconfig.json` con `"strict": true`.
+7. `src/index.ts` mostrando selección de sesión y restricción de opciones admin (`12-15`).
+8. Una corrida real en terminal mostrando flujo CRUD completo.
 
 ## Como abrir
 

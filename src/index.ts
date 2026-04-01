@@ -1,36 +1,19 @@
+import { ServicioCategorias, ServicioSeries, ServicioUsuarios } from "./application/services";
+import type { Rol, Usuario } from "./domain/entities/User";
+import { datosUsuarios } from "./data";
 import {
-  CategoryService,
-  EpisodeService,
-  SeasonService,
-  SeriesService,
-  UserService
-} from "./application/services";
-import type { Rol, User } from "./domain/entities/User";
-import { usersData } from "./data";
-import {
-  InMemoryCategoryRepository,
-  InMemoryEpisodeRepository,
-  InMemorySeasonRepository,
-  InMemorySeriesRepository,
-  InMemoryUserRepository
-} from "./infrastructure/repositories";
-import {
-  CategoryController,
-  SeasonEpisodeController,
-  SeriesController,
-  UserController
+  ControladorCategorias,
+  ControladorSeries,
+  ControladorUsuarios
 } from "./presentation/controllers";
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 
-type CliInterface = ReturnType<typeof createInterface>;
-type MenuAction = (rl: CliInterface) => Promise<void>;
+const controladorCategorias = new ControladorCategorias(new ServicioCategorias());
+const controladorSeries = new ControladorSeries(new ServicioSeries());
+const controladorUsuarios = new ControladorUsuarios(new ServicioUsuarios());
 
-const INVALID_ID = "❌ ID inválido.";
-const INVALID_ROLE = "❌ Rol inválido. Debe ser ADMIN o USER.";
-const INVALID_NUMERIC_DATA = "❌ Datos numéricos inválidos.";
-
-const MENU_TEXT_COMMON = `===== MENÚ PRINCIPAL =====
+const TEXTO_MENU = `===== MENÚ PRINCIPAL =====
 
 --- CATEGORÍAS ---
 1. Listar categorías
@@ -47,206 +30,51 @@ const MENU_TEXT_COMMON = `===== MENÚ PRINCIPAL =====
 10. Eliminar serie
 11. Filtrar series por categoría
 
---- TEMPORADAS ---
-12. Listar temporadas
-13. Crear temporada
-14. Actualizar temporada
-15. Eliminar temporada
-
---- EPISODIOS ---
-16. Listar episodios por temporada
-17. Crear episodio
-18. Actualizar episodio
-19. Eliminar episodio
-20. Listar todos los episodios`;
-
-// Role-specific menu blocks are appended to the shared menu text.
-const MENU_TEXT_ADMIN = `
 --- USUARIOS (SOLO ADMIN) ---
-21. Listar usuarios activos
-22. Crear usuario
-23. Actualizar usuario
-24. Eliminar usuario (borrado lógico)`;
+12. Listar usuarios activos
+13. Crear usuario
+14. Actualizar usuario
+15. Eliminar usuario (borrado lógico)
 
-const MENU_TEXT_USER = `
---- USUARIOS (RESTRINGIDO) ---
-Solo ADMIN puede usar opciones 21 a 24.`;
+0. Salir`;
 
-// Composition root.
-const categoryRepository = new InMemoryCategoryRepository();
-const seriesRepository = new InMemorySeriesRepository();
-const seasonRepository = new InMemorySeasonRepository();
-const episodeRepository = new InMemoryEpisodeRepository();
-const userRepository = new InMemoryUserRepository();
-
-const categoryController = new CategoryController(
-  new CategoryService(categoryRepository, seriesRepository)
-);
-const seriesController = new SeriesController(
-  new SeriesService(seriesRepository, categoryRepository, seasonRepository, episodeRepository)
-);
-const seasonEpisodeController = new SeasonEpisodeController(
-  new SeasonService(seasonRepository, episodeRepository, seriesRepository),
-  new EpisodeService(episodeRepository, seasonRepository)
-);
-const userController = new UserController(new UserService(userRepository));
-
-function resolveAdminUser(): User {
-  const admin = usersData.find((user) => user.rol === "ADMIN") ?? usersData[0];
-  if (!admin) {
-    throw new Error("No hay usuario admin inicial para operar el sistema.");
-  }
-
-  return admin;
+function esAdmin(usuario: Usuario): boolean {
+  return usuario.rol === "ADMIN";
 }
 
-const adminUser = resolveAdminUser();
-// Current session user selected at startup; drives role-based behavior in CLI.
-let sessionUser: User = adminUser;
-
-// Central role check used by menu rendering and admin-only actions.
-function isAdmin(user: User): boolean {
-  return user.rol === "ADMIN";
+function aNumero(valor: string): number | null {
+  const convertido = Number(valor);
+  return Number.isFinite(convertido) ? convertido : null;
 }
 
-// Session selector only shows active users; falls back to seeded users if needed.
-function getSessionUsers(): User[] {
-  const activeUsers = usersData.filter((user) => user.activo);
-  return activeUsers.length > 0 ? activeUsers : usersData;
+function aRol(valor: string): Rol | null {
+  const normalizado = valor.trim().toUpperCase();
+  return normalizado === "ADMIN" || normalizado === "USER" ? normalizado : null;
 }
 
-function parseNumber(value: string): number | null {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
-}
+async function seleccionarUsuarioSesion(
+  lector: ReturnType<typeof createInterface>
+): Promise<Usuario> {
+  const usuariosActivos = datosUsuarios.filter((usuario) => usuario.activo);
+  const usuarios = usuariosActivos.length > 0 ? usuariosActivos : datosUsuarios;
 
-function parseRequiredRole(rawRole: string): Rol | null {
-  const normalized = rawRole.trim().toUpperCase();
-  return normalized === "ADMIN" || normalized === "USER" ? normalized : null;
-}
-
-function parseOptionalRole(rawRole: string): Rol | undefined | null {
-  const normalized = rawRole.trim().toUpperCase();
-  if (!normalized) {
-    return undefined;
-  }
-
-  return normalized === "ADMIN" || normalized === "USER" ? normalized : null;
-}
-
-async function askRequiredNumber(
-  rl: CliInterface,
-  prompt: string,
-  invalidMessage: string
-): Promise<number | null> {
-  const value = parseNumber(await rl.question(prompt));
-  if (value === null) {
-    console.log(invalidMessage);
-  }
-  return value;
-}
-
-async function askOptionalNumber(
-  rl: CliInterface,
-  prompt: string,
-  invalidMessage: string
-): Promise<number | undefined | null> {
-  const rawValue = (await rl.question(prompt)).trim();
-  if (!rawValue) {
-    return undefined;
-  }
-
-  const value = parseNumber(rawValue);
-  if (value === null) {
-    console.log(invalidMessage);
-  }
-
-  return value;
-}
-
-async function askRequiredRole(
-  rl: CliInterface,
-  prompt: string,
-  invalidMessage: string
-): Promise<Rol | null> {
-  const role = parseRequiredRole(await rl.question(prompt));
-  if (!role) {
-    console.log(invalidMessage);
-  }
-  return role;
-}
-
-async function askOptionalRole(
-  rl: CliInterface,
-  prompt: string,
-  invalidMessage: string
-): Promise<Rol | undefined | null> {
-  const role = parseOptionalRole(await rl.question(prompt));
-  if (role === null) {
-    console.log(invalidMessage);
-  }
-  return role;
-}
-
-async function confirmDeletion(rl: CliInterface, label: string): Promise<boolean> {
-  const confirm = (await rl.question(`¿Seguro que deseas eliminar ${label}? (s/n): `))
-    .trim()
-    .toLowerCase();
-  return confirm === "s" || confirm === "si" || confirm === "sí";
-}
-
-async function confirmAndRun(
-  rl: CliInterface,
-  label: string,
-  action: () => void | Promise<void>
-): Promise<void> {
-  if (await confirmDeletion(rl, label)) {
-    await action();
-    return;
-  }
-
-  console.log("ℹ️ Eliminación cancelada.");
-}
-
-function createDeleteAction(
-  prompt: string,
-  labelBuilder: (id: number) => string,
-  onDelete: (id: number) => void | Promise<void>
-): MenuAction {
-  return async (rl) => {
-    const id = await askRequiredNumber(rl, prompt, INVALID_ID);
-    if (id === null) {
-      return;
-    }
-
-    await confirmAndRun(rl, labelBuilder(id), () => onDelete(id));
-  };
-}
-
-function printMenu(currentUser: User): void {
-  // Inject users section based on current role.
-  const userSection = isAdmin(currentUser) ? MENU_TEXT_ADMIN : MENU_TEXT_USER;
-  console.log(`\n${MENU_TEXT_COMMON}${userSection}\n\n0. Salir`);
-}
-
-async function selectSessionUser(rl: CliInterface): Promise<User> {
-  // Simple role selection (no password) to keep the demo flow fast.
-  const availableUsers = getSessionUsers();
   console.log("\n👤 Selecciona el usuario para iniciar sesión:");
-  for (const [index, user] of availableUsers.entries()) {
-    console.log(`${index + 1}. ${user.nombre} (${user.rol}) - ${user.email}`);
-  }
+  usuarios.forEach((usuario, indice) => {
+    console.log(`${indice + 1}. ${usuario.nombre} (${usuario.rol}) - ${usuario.email}`);
+  });
 
   while (true) {
-    const selection = Number((await rl.question("\nElige un número de usuario: ")).trim());
+    const seleccionado = aNumero((await lector.question("\nElige un número de usuario: ")).trim());
+
     if (
-      Number.isInteger(selection) &&
-      selection >= 1 &&
-      selection <= availableUsers.length
+      seleccionado !== null &&
+      Number.isInteger(seleccionado) &&
+      seleccionado >= 1 &&
+      seleccionado <= usuarios.length
     ) {
-      const selectedUser = availableUsers[selection - 1];
-      if (selectedUser) {
-        return selectedUser;
+      const usuarioSeleccionado = usuarios[seleccionado - 1];
+      if (usuarioSeleccionado) {
+        return usuarioSeleccionado;
       }
     }
 
@@ -254,274 +82,239 @@ async function selectSessionUser(rl: CliInterface): Promise<User> {
   }
 }
 
-const menuActions: Record<string, MenuAction> = {
-  "1": async () => {
-    categoryController.list();
-  },
-  "2": async (rl) => {
-    const name = await rl.question("Nombre de la categoría: ");
-    const description = await rl.question("Descripción: ");
-    categoryController.create(name, description);
-  },
-  "3": async (rl) => {
-    const id = await askRequiredNumber(rl, "ID de la categoría: ", INVALID_ID);
-    if (id === null) {
-      return;
-    }
-    categoryController.getById(id);
-  },
-  "4": async (rl) => {
-    const id = await askRequiredNumber(rl, "ID de la categoría a actualizar: ", INVALID_ID);
-    if (id === null) {
-      return;
-    }
+async function iniciarCli(): Promise<void> {
+  const lector = createInterface({ input, output });
 
-    const name = (await rl.question("Nuevo nombre (enter para omitir): ")).trim();
-    const description = (await rl.question("Nueva descripción (enter para omitir): ")).trim();
-    categoryController.update(id, {
-      name: name || undefined,
-      description: description || undefined
-    });
-  },
-  "5": createDeleteAction(
-    "ID de la categoría a eliminar: ",
-    (id) => `la categoría ${id}`,
-    (id) => categoryController.remove(id)
-  ),
+  const preguntar = (pregunta: string): Promise<string> => lector.question(pregunta);
 
-  "6": async () => {
-    seriesController.list();
-  },
-  "7": async (rl) => {
-    const title = await rl.question("Título de la serie: ");
-    const categoryId = await askRequiredNumber(rl, "ID de la categoría: ", "❌ ID de categoría inválido.");
-    if (categoryId === null) {
-      return;
+  const preguntarNumero = async (pregunta: string): Promise<number | null> => {
+    const valor = aNumero((await preguntar(pregunta)).trim());
+    if (valor === null) {
+      console.log("❌ Debes ingresar un número válido.");
     }
-    seriesController.create(title, categoryId);
-  },
-  "8": async (rl) => {
-    const id = await askRequiredNumber(rl, "ID de la serie: ", INVALID_ID);
-    if (id === null) {
-      return;
-    }
-    seriesController.getById(id);
-  },
-  "9": async (rl) => {
-    const id = await askRequiredNumber(rl, "ID de la serie a actualizar: ", INVALID_ID);
-    if (id === null) {
-      return;
-    }
+    return valor;
+  };
 
-    const title = (await rl.question("Nuevo título (enter para omitir): ")).trim();
-    const categoryId = await askOptionalNumber(
-      rl,
-      "Nuevo ID de categoría (enter para omitir): ",
-      "❌ ID de categoría inválido."
-    );
-    if (categoryId === null) {
-      return;
-    }
+  const confirmarEliminacion = async (etiqueta: string): Promise<boolean> => {
+    const respuesta = (await preguntar(`¿Seguro que deseas eliminar ${etiqueta}? (s/n): `))
+      .trim()
+      .toLowerCase();
 
-    seriesController.update(id, {
-      title: title || undefined,
-      categoryId
-    });
-  },
-  "10": createDeleteAction(
-    "ID de la serie a eliminar: ",
-    (id) => `la serie ${id}`,
-    (id) => seriesController.remove(id)
-  ),
-  "11": async (rl) => {
-    const categoryId = await askRequiredNumber(rl, "ID de la categoría a filtrar: ", INVALID_ID);
-    if (categoryId === null) {
-      return;
-    }
-    seriesController.listByCategory(categoryId);
-  },
+    return respuesta === "s" || respuesta === "si" || respuesta === "sí";
+  };
 
-  "12": async () => {
-    seasonEpisodeController.listSeasons();
-  },
-  "13": async (rl) => {
-    const seriesId = await askRequiredNumber(rl, "ID de la serie: ", INVALID_NUMERIC_DATA);
-    const number = await askRequiredNumber(rl, "Número de temporada: ", INVALID_NUMERIC_DATA);
-    if (seriesId === null || number === null) {
-      return;
-    }
-
-    const title = await rl.question("Título de la temporada: ");
-    seasonEpisodeController.createSeason(seriesId, number, title);
-  },
-  "14": async (rl) => {
-    const id = await askRequiredNumber(rl, "ID de la temporada a actualizar: ", INVALID_ID);
-    if (id === null) {
-      return;
-    }
-
-    const number = await askOptionalNumber(rl, "Nuevo número (enter para omitir): ", "❌ Número inválido.");
-    if (number === null) {
-      return;
-    }
-
-    const title = (await rl.question("Nuevo título (enter para omitir): ")).trim();
-    seasonEpisodeController.updateSeason(id, {
-      number,
-      title: title || undefined
-    });
-  },
-  "15": createDeleteAction(
-    "ID de la temporada a eliminar: ",
-    (id) => `la temporada ${id}`,
-    (id) => seasonEpisodeController.removeSeason(id)
-  ),
-  "16": async (rl) => {
-    const seasonId = await askRequiredNumber(rl, "ID de la temporada: ", INVALID_ID);
-    if (seasonId === null) {
-      return;
-    }
-    seasonEpisodeController.listEpisodesBySeason(seasonId);
-  },
-  "17": async (rl) => {
-    const seasonId = await askRequiredNumber(rl, "ID de la temporada: ", INVALID_NUMERIC_DATA);
-    const number = await askRequiredNumber(rl, "Número de episodio: ", INVALID_NUMERIC_DATA);
-    const durationMin = await askRequiredNumber(rl, "Duración (minutos): ", INVALID_NUMERIC_DATA);
-    if (seasonId === null || number === null || durationMin === null) {
-      return;
-    }
-
-    const title = await rl.question("Título del episodio: ");
-    seasonEpisodeController.createEpisode(seasonId, number, title, durationMin);
-  },
-  "18": async (rl) => {
-    const id = await askRequiredNumber(rl, "ID del episodio a actualizar: ", INVALID_ID);
-    if (id === null) {
-      return;
-    }
-
-    const number = await askOptionalNumber(
-      rl,
-      "Nuevo número (enter para omitir): ",
-      "❌ Número o duración inválidos."
-    );
-    const durationMin = await askOptionalNumber(
-      rl,
-      "Nueva duración en minutos (enter para omitir): ",
-      "❌ Número o duración inválidos."
-    );
-    if (number === null || durationMin === null) {
-      return;
-    }
-
-    const title = (await rl.question("Nuevo título (enter para omitir): ")).trim();
-    seasonEpisodeController.updateEpisode(id, {
-      number,
-      title: title || undefined,
-      durationMin
-    });
-  },
-  "19": createDeleteAction(
-    "ID del episodio a eliminar: ",
-    (id) => `el episodio ${id}`,
-    (id) => seasonEpisodeController.removeEpisode(id)
-  ),
-  "20": async () => {
-    seasonEpisodeController.listAllEpisodes();
-  },
-
-  // Admin-only user management options (21-24) are guarded at CLI level.
-  "21": async () => {
-    if (!isAdmin(sessionUser)) {
-      console.log("❌ Esta opción es solo para usuarios ADMIN.");
-      return;
-    }
-    await userController.listActive(sessionUser);
-  },
-  "22": async (rl) => {
-    if (!isAdmin(sessionUser)) {
-      console.log("❌ Esta opción es solo para usuarios ADMIN.");
-      return;
-    }
-
-    const nombre = await rl.question("Nombre: ");
-    const email = await rl.question("Email: ");
-    const password = await rl.question("Contraseña: ");
-    const rol = await askRequiredRole(rl, "Rol (ADMIN/USER): ", INVALID_ROLE);
-    if (!rol) {
-      return;
-    }
-
-    await userController.create(sessionUser, { nombre, email, password, rol });
-  },
-  "23": async (rl) => {
-    if (!isAdmin(sessionUser)) {
-      console.log("❌ Esta opción es solo para usuarios ADMIN.");
-      return;
-    }
-
-    const id = await askRequiredNumber(rl, "ID de usuario a actualizar: ", INVALID_ID);
-    if (id === null) {
-      return;
-    }
-
-    const nombre = (await rl.question("Nuevo nombre (enter para omitir): ")).trim();
-    const email = (await rl.question("Nuevo email (enter para omitir): ")).trim();
-    const rol = await askOptionalRole(
-      rl,
-      "Nuevo rol ADMIN/USER (enter para omitir): ",
-      INVALID_ROLE
-    );
-    if (rol === null) {
-      return;
-    }
-
-    await userController.update(sessionUser, id, {
-      nombre: nombre || undefined,
-      email: email || undefined,
-      rol
-    });
-  },
-  "24": async (rl) => {
-    if (!isAdmin(sessionUser)) {
-      console.log("❌ Esta opción es solo para usuarios ADMIN.");
-      return;
-    }
-
-    const deleteUserAction = createDeleteAction(
-      "ID de usuario a eliminar: ",
-      (id) => `el usuario ${id}`,
-      (id) => userController.remove(sessionUser, id)
-    );
-    await deleteUserAction(rl);
-  }
-};
-
-async function bootstrapCli(): Promise<void> {
-  const rl = createInterface({ input, output });
   console.log("\n🎬 Bienvenido a Crunchyroll CLI");
-  // Pick the session user before showing the menu.
-  sessionUser = await selectSessionUser(rl);
-  console.log(`\n🔐 Sesión actual: ${sessionUser.nombre} (${sessionUser.rol})\n`);
+  const usuarioActual = await seleccionarUsuarioSesion(lector);
+
+  console.log(`\n🔐 Sesión actual: ${usuarioActual.nombre} (${usuarioActual.rol})`);
 
   while (true) {
-    printMenu(sessionUser);
-    const option = (await rl.question("\nSelecciona una opción: ")).trim();
+    console.log(`\n${TEXTO_MENU}`);
 
-    if (option === "0") {
+    const opcion = (await preguntar("\nSelecciona una opción: ")).trim();
+
+    if (opcion === "0") {
       console.log("👋 Saliendo de la aplicación...");
-      rl.close();
+      lector.close();
       return;
     }
 
-    const action = menuActions[option];
-    if (!action) {
-      console.log("❌ Opción no válida.");
+    if (["12", "13", "14", "15"].includes(opcion) && !esAdmin(usuarioActual)) {
+      console.log("❌ Esta opción es solo para usuarios ADMIN.");
       continue;
     }
 
-    await action(rl);
+    switch (opcion) {
+      case "1":
+        controladorCategorias.listar();
+        break;
+
+      case "2": {
+        const nombre = await preguntar("Nombre de la categoría: ");
+        const descripcion = await preguntar("Descripción: ");
+        controladorCategorias.crear(nombre, descripcion);
+        break;
+      }
+
+      case "3": {
+        const id = await preguntarNumero("ID de la categoría: ");
+        if (id !== null) {
+          controladorCategorias.buscarPorId(id);
+        }
+        break;
+      }
+
+      case "4": {
+        const id = await preguntarNumero("ID de la categoría a actualizar: ");
+        if (id === null) {
+          break;
+        }
+
+        const nombre = (await preguntar("Nuevo nombre (enter para omitir): ")).trim();
+        const descripcion = (await preguntar("Nueva descripción (enter para omitir): ")).trim();
+
+        controladorCategorias.actualizar(id, {
+          nombre: nombre || undefined,
+          descripcion: descripcion || undefined
+        });
+        break;
+      }
+
+      case "5": {
+        const id = await preguntarNumero("ID de la categoría a eliminar: ");
+        if (id === null) {
+          break;
+        }
+
+        const confirmado = await confirmarEliminacion(`la categoría ${id}`);
+        if (!confirmado) {
+          console.log("ℹ️ Eliminación cancelada.");
+          break;
+        }
+
+        controladorCategorias.eliminar(id);
+        break;
+      }
+
+      case "6":
+        controladorSeries.listar();
+        break;
+
+      case "7": {
+        const titulo = await preguntar("Título de la serie: ");
+        const categoriaId = await preguntarNumero("ID de la categoría: ");
+        if (categoriaId !== null) {
+          controladorSeries.crear(titulo, categoriaId);
+        }
+        break;
+      }
+
+      case "8": {
+        const id = await preguntarNumero("ID de la serie: ");
+        if (id !== null) {
+          controladorSeries.buscarPorId(id);
+        }
+        break;
+      }
+
+      case "9": {
+        const id = await preguntarNumero("ID de la serie a actualizar: ");
+        if (id === null) {
+          break;
+        }
+
+        const titulo = (await preguntar("Nuevo título (enter para omitir): ")).trim();
+        const entradaCategoria = (await preguntar("Nuevo ID de categoría (enter para omitir): ")).trim();
+
+        let categoriaId: number | undefined;
+        if (entradaCategoria) {
+          const convertido = aNumero(entradaCategoria);
+          if (convertido === null) {
+            console.log("❌ Debes ingresar un número válido.");
+            break;
+          }
+
+          categoriaId = convertido;
+        }
+
+        controladorSeries.actualizar(id, {
+          titulo: titulo || undefined,
+          categoriaId
+        });
+        break;
+      }
+
+      case "10": {
+        const id = await preguntarNumero("ID de la serie a eliminar: ");
+        if (id === null) {
+          break;
+        }
+
+        const confirmado = await confirmarEliminacion(`la serie ${id}`);
+        if (!confirmado) {
+          console.log("ℹ️ Eliminación cancelada.");
+          break;
+        }
+
+        controladorSeries.eliminar(id);
+        break;
+      }
+
+      case "11": {
+        const categoriaId = await preguntarNumero("ID de la categoría a filtrar: ");
+        if (categoriaId !== null) {
+          controladorSeries.listarPorCategoria(categoriaId);
+        }
+        break;
+      }
+
+      case "12":
+        await controladorUsuarios.listarActivos(usuarioActual);
+        break;
+
+      case "13": {
+        const nombre = await preguntar("Nombre: ");
+        const email = await preguntar("Email: ");
+        const password = await preguntar("Contraseña: ");
+        const rol = aRol(await preguntar("Rol (ADMIN/USER): "));
+
+        if (!rol) {
+          console.log("❌ Rol inválido. Debe ser ADMIN o USER.");
+          break;
+        }
+
+        await controladorUsuarios.crear(usuarioActual, { nombre, email, password, rol });
+        break;
+      }
+
+      case "14": {
+        const id = await preguntarNumero("ID de usuario a actualizar: ");
+        if (id === null) {
+          break;
+        }
+
+        const nombre = (await preguntar("Nuevo nombre (enter para omitir): ")).trim();
+        const email = (await preguntar("Nuevo email (enter para omitir): ")).trim();
+        const entradaRol = (await preguntar("Nuevo rol ADMIN/USER (enter para omitir): ")).trim();
+
+        let rol: Rol | undefined;
+        if (entradaRol) {
+          const rolConvertido = aRol(entradaRol);
+          if (!rolConvertido) {
+            console.log("❌ Rol inválido. Debe ser ADMIN o USER.");
+            break;
+          }
+          rol = rolConvertido;
+        }
+
+        await controladorUsuarios.actualizar(usuarioActual, id, {
+          nombre: nombre || undefined,
+          email: email || undefined,
+          rol
+        });
+        break;
+      }
+
+      case "15": {
+        const id = await preguntarNumero("ID de usuario a eliminar: ");
+        if (id === null) {
+          break;
+        }
+
+        const confirmado = await confirmarEliminacion(`el usuario ${id}`);
+        if (!confirmado) {
+          console.log("ℹ️ Eliminación cancelada.");
+          break;
+        }
+
+        await controladorUsuarios.eliminar(usuarioActual, id);
+        break;
+      }
+
+      default:
+        console.log("❌ Opción no válida.");
+    }
   }
 }
 
-void bootstrapCli();
+void iniciarCli();

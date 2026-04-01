@@ -1,4 +1,3 @@
-export { CategoryController } from "./CategoryController";
-export { SeriesController } from "./SeriesController";
-export { SeasonEpisodeController } from "./SeasonEpisodeController";
-export { UserController } from "./UserController";
+export { ControladorCategorias } from "./CategoryController";
+export { ControladorSeries } from "./SeriesController";
+export { ControladorUsuarios } from "./UserController";

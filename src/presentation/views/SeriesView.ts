@@ -1,24 +1,20 @@
-import { Series } from "../../domain/entities/Series";
+import { Serie } from "../../domain/entities/Series";
 
-export class SeriesView {
-  static showItem(series: Series): void {
-    console.log(
-      `🎬 Serie [${series.id}] ${series.title} | Categoria ${series.categoryId} | Temporadas: ${series.seasonIds.length}`
-    );
+export class VistaSeries {
+  static mostrarItem(serie: Serie): void {
+    console.log(`🎬 Serie [${serie.id}] ${serie.titulo} | Categoria ${serie.categoriaId}`);
   }
 
-  static showList(seriesList: Series[]): void {
+  static mostrarLista(series: Serie[]): void {
     console.log("\n🎬 Series:\n");
 
-    if (seriesList.length === 0) {
+    if (series.length === 0) {
       console.log("- Sin registros.");
       return;
     }
 
-    for (const series of seriesList) {
-      console.log(
-        `- [${series.id}] ${series.title} | Categoria ${series.categoryId} | Temporadas: ${series.seasonIds.length}`
-      );
+    for (const serie of series) {
+      console.log(`- [${serie.id}] ${serie.titulo} | Categoria ${serie.categoriaId}`);
     }
   }
 }

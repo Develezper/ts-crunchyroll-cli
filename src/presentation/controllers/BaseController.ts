@@ -1,45 +1,45 @@
-import { CommonView } from "../views/CommonView";
+import { VistaComun } from "../views/CommonView";
 
-type SyncAction<T> = () => T;
-type AsyncAction<T> = () => Promise<T>;
-type SyncVoidAction = () => void;
-type AsyncVoidAction = () => Promise<void>;
+type AccionSincrona<T> = () => T;
+type AccionAsincrona<T> = () => Promise<T>;
+type AccionSincronaVacia = () => void;
+type AccionAsincronaVacia = () => Promise<void>;
 
-export abstract class BaseController {
-  protected execute<T>(action: SyncAction<T>): T | undefined {
+export abstract class ControladorBase {
+  protected ejecutar<T>(accion: AccionSincrona<T>): T | undefined {
     try {
-      return action();
+      return accion();
     } catch (error) {
-      CommonView.showError(error);
+      VistaComun.mostrarError(error);
       return undefined;
     }
   }
 
-  protected async executeAsync<T>(action: AsyncAction<T>): Promise<T | undefined> {
+  protected async ejecutarAsync<T>(accion: AccionAsincrona<T>): Promise<T | undefined> {
     try {
-      return await action();
+      return await accion();
     } catch (error) {
-      CommonView.showError(error);
+      VistaComun.mostrarError(error);
       return undefined;
     }
   }
 
-  protected run(action: SyncVoidAction): boolean {
+  protected ejecutarVacio(accion: AccionSincronaVacia): boolean {
     try {
-      action();
+      accion();
       return true;
     } catch (error) {
-      CommonView.showError(error);
+      VistaComun.mostrarError(error);
       return false;
     }
   }
 
-  protected async runAsync(action: AsyncVoidAction): Promise<boolean> {
+  protected async ejecutarVacioAsync(accion: AccionAsincronaVacia): Promise<boolean> {
     try {
-      await action();
+      await accion();
       return true;
     } catch (error) {
-      CommonView.showError(error);
+      VistaComun.mostrarError(error);
       return false;
     }
   }

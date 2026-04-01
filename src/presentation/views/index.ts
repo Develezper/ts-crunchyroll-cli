@@ -1,5 +1,4 @@
-export { CommonView } from "./CommonView";
-export { CategoryView } from "./CategoryView";
-export { SeriesView } from "./SeriesView";
-export { SeasonEpisodeView } from "./SeasonEpisodeView";
-export { UserView } from "./UserView";
+export { VistaComun } from "./CommonView";
+export { VistaCategorias } from "./CategoryView";
+export { VistaSeries } from "./SeriesView";
+export { VistaUsuarios } from "./UserView";

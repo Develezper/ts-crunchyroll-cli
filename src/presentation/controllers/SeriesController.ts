@@ -1,66 +1,66 @@
-import { SeriesService } from "../../application/services/SeriesService";
-import { BaseController } from "./BaseController";
-import { CommonView } from "../views/CommonView";
-import { SeriesView } from "../views/SeriesView";
+import { ServicioSeries } from "../../application/services/SeriesService";
+import { ControladorBase } from "./BaseController";
+import { VistaComun } from "../views/CommonView";
+import { VistaSeries } from "../views/SeriesView";
 
-export class SeriesController extends BaseController {
-  constructor(private readonly seriesService: SeriesService) {
+export class ControladorSeries extends ControladorBase {
+  constructor(private readonly servicioSeries: ServicioSeries) {
     super();
   }
 
-  create(title: string, categoryId: number): void {
-    const created = this.execute(() => this.seriesService.create(title, categoryId));
-    if (!created) {
+  crear(titulo: string, categoriaId: number): void {
+    const creada = this.ejecutar(() => this.servicioSeries.crear(titulo, categoriaId));
+    if (!creada) {
       return;
     }
 
-    CommonView.showSuccess("Serie creada correctamente.");
-    SeriesView.showItem(created);
+    VistaComun.mostrarExito("Serie creada correctamente.");
+    VistaSeries.mostrarItem(creada);
   }
 
-  list(): void {
-    const seriesList = this.execute(() => this.seriesService.findAll());
-    if (!seriesList) {
+  listar(): void {
+    const listaSeries = this.ejecutar(() => this.servicioSeries.listar());
+    if (!listaSeries) {
       return;
     }
 
-    SeriesView.showList(seriesList);
+    VistaSeries.mostrarLista(listaSeries);
   }
 
-  getById(id: number): void {
-    const series = this.execute(() => this.seriesService.findById(id));
-    if (!series) {
+  buscarPorId(id: number): void {
+    const serie = this.ejecutar(() => this.servicioSeries.buscarPorId(id));
+    if (!serie) {
       return;
     }
 
-    SeriesView.showItem(series);
+    VistaSeries.mostrarItem(serie);
   }
 
-  listByCategory(categoryId: number): void {
-    const seriesList = this.execute(() => this.seriesService.findByCategory(categoryId));
-    if (!seriesList) {
+  listarPorCategoria(categoriaId: number): void {
+    const listaSeries = this.ejecutar(() => this.servicioSeries.listarPorCategoria(categoriaId));
+    if (!listaSeries) {
       return;
     }
 
-    SeriesView.showList(seriesList);
+    VistaSeries.mostrarLista(listaSeries);
   }
 
-  update(id: number, data: { title?: string; categoryId?: number }): void {
-    const updated = this.execute(() => this.seriesService.update(id, data));
-    if (!updated) {
+  actualizar(id: number, data: { titulo?: string; categoriaId?: number }): void {
+    const actualizada = this.ejecutar(() => this.servicioSeries.actualizar(id, data));
+    if (!actualizada) {
       return;
     }
 
-    CommonView.showSuccess("Serie actualizada correctamente.");
-    SeriesView.showItem(updated);
+    VistaComun.mostrarExito("Serie actualizada correctamente.");
+    VistaSeries.mostrarItem(actualizada);
   }
 
-  remove(id: number): void {
-    const completed = this.run(() => this.seriesService.remove(id));
-    if (!completed) {
+  eliminar(id: number): void {
+    const completado = this.ejecutarVacio(() => this.servicioSeries.eliminar(id));
+    if (!completado) {
       return;
     }
 
-    CommonView.showSuccess(`Serie ${id} eliminada correctamente.`);
+    VistaComun.mostrarExito(`Serie ${id} eliminada correctamente.`);
   }
 }

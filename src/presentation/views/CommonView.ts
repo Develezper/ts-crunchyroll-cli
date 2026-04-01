@@ -1,10 +1,10 @@
-export class CommonView {
-  static showSuccess(message: string): void {
-    console.log(`✅ ${message}`);
+export class VistaComun {
+  static mostrarExito(mensaje: string): void {
+    console.log(`✅ ${mensaje}`);
   }
 
-  static showError(error: unknown): void {
-    const message = error instanceof Error ? error.message : "Error desconocido.";
-    console.error(`❌ ${message}`);
+  static mostrarError(error: unknown): void {
+    const mensaje = error instanceof Error ? error.message : "Error desconocido.";
+    console.error(`❌ ${mensaje}`);
   }
 }

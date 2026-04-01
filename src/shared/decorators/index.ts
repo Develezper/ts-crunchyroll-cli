@@ -1,1 +1,1 @@
-export { LogExecution } from "./LogExecution";
+export { RegistrarEjecucion } from "./LogExecution";
